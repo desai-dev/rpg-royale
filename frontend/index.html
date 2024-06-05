@@ -1,27 +1,12 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-
-  </head>
+  <head></head>
   <body>
-    <script>
-      let socket = new WebSocket("ws://localhost:8080/ws")
-      console.log("Attempting connection")
+    <button id="create-button">CREATE</button>
+    <button id="join-button">JOIN</button>
 
-      socket.onopen = () => {
-        console.log("Connected!")
-        socket.send("Hi from the client!");
-      }
 
-      socket.onclose = () => {
-        console.log("Connection closed!");
-      }
-
-      socket.onmessage = (msg) => {
-        console.log(msg);
-      }
-
-    </script>
+    <script src="index.js"></script>
   </body>
 </html>
