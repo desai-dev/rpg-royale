@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -23,12 +25,38 @@ type Manager struct {
 	// We need this to lock the state of the manager before adding clients to avoid
 	// hash collisions during concurrent connections
 	sync.RWMutex
+
+	handlers map[string]EventHandler
 }
 
 // Initializes a manager
 func NewManager() *Manager {
-	return &Manager{
-		clients: make(ClientList),
+	m := &Manager{
+		clients:  make(ClientList),
+		handlers: make(map[string]EventHandler),
+	}
+
+	m.setupEventHandlers()
+	return m
+}
+
+func (m *Manager) setupEventHandlers() {
+	m.handlers[EventCreateParty] = CreateParty
+}
+
+func CreateParty(event Event, c *Client) error {
+	fmt.Println(event.Type)
+	return nil
+}
+
+func (m *Manager) routeEvent(event Event, c *Client) error {
+	if handler, ok := m.handlers[event.Type]; ok {
+		if err := handler(event, c); err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return errors.New("there is no such event")
 	}
 }
 

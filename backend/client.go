@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -15,7 +16,7 @@ type Client struct {
 	manager    *Manager
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
-	egress chan []byte
+	egress chan Event
 }
 
 // Initializes a new client
@@ -23,7 +24,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection: conn,
 		manager:    manager,
-		egress:     make(chan []byte),
+		egress:     make(chan Event),
 	}
 }
 
@@ -34,7 +35,7 @@ func (c *Client) readMessages() {
 	}()
 
 	for {
-		messageType, payload, err := c.connection.ReadMessage()
+		_, payload, err := c.connection.ReadMessage()
 
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -42,8 +43,15 @@ func (c *Client) readMessages() {
 			}
 			break
 		}
-		log.Println("MessageType: ", messageType)
-		log.Println("Payload: ", string(payload))
+
+		var request Event
+		if err := json.Unmarshal(payload, &request); err != nil {
+			log.Printf("err in unmarshal: %v", err)
+		}
+
+		if err := c.manager.routeEvent(request, c); err != nil {
+			log.Printf("err in routing event: %v", err)
+		}
 	}
 }
 
@@ -65,8 +73,14 @@ func (c *Client) writeMessages() {
 				return
 			}
 
+			data, err := json.Marshal(message)
+			if err != nil {
+				log.Println("error in marshalling ", err)
+				return
+			}
+
 			// In this case, the egress channel is still oppen
-			if err := c.connection.WriteMessage(websocket.TextMessage, message); err != nil {
+			if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
 				log.Println(err)
 			}
 		}
