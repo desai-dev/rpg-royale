@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -21,7 +22,7 @@ var (
 // Manager manages clients
 type Manager struct {
 	clients ClientList
-
+	parties PartyList
 	// We need this to lock the state of the manager before adding clients to avoid
 	// hash collisions during concurrent connections
 	sync.RWMutex
@@ -33,6 +34,7 @@ type Manager struct {
 func NewManager() *Manager {
 	m := &Manager{
 		clients:  make(ClientList),
+		parties:  make(PartyList),
 		handlers: make(map[string]EventHandler),
 	}
 
@@ -40,24 +42,99 @@ func NewManager() *Manager {
 	return m
 }
 
+// Setups up event handlers
 func (m *Manager) setupEventHandlers() {
 	m.handlers[EventCreateParty] = CreateParty
+	m.handlers[EventJoinParty] = JoinParty
 }
 
-func CreateParty(event Event, c *Client) error {
-	fmt.Println(event.Type)
-	return nil
-}
-
+// Routes an event to the correct handler, if possible
 func (m *Manager) routeEvent(event Event, c *Client) error {
 	if handler, ok := m.handlers[event.Type]; ok {
-		if err := handler(event, c); err != nil {
+		if err := handler(event, m, c); err != nil {
 			return err
 		}
 		return nil
 	} else {
 		return errors.New("there is no such event")
 	}
+}
+
+// Create party even handler
+func CreateParty(event Event, m *Manager, c *Client) error {
+	fmt.Println(event.Type)
+	m.createParty(c)
+	return nil
+}
+
+// Creates a new party
+func (m *Manager) createParty(client *Client) {
+	m.Lock()
+	defer m.Unlock()
+
+	// Client already in party
+	if client.inParty {
+		fmt.Println("You are already in a party!")
+		return
+	}
+
+	partyID := GenerateRandomString(10)
+	party := &Party{id: partyID, clients: []*Client{client}, partySize: 1}
+	client.inParty = true
+	m.parties[partyID] = party
+
+	fmt.Println("Here is an update of all the parties: ")
+	for id, party := range m.parties {
+		fmt.Printf("Party ID: %s, Number of Clients: %d\n", id, len(party.clients))
+	}
+
+	responseEvent := Event{Type: "PARTY_CREATED", Payload: json.RawMessage(fmt.Sprintf(`{"partyID":"%s"}`, partyID))}
+	client.egress <- responseEvent
+}
+
+// Join party event handler
+func JoinParty(event Event, m *Manager, c *Client) error {
+	fmt.Println(event.Type)
+
+	var payload JoinPartyPayload
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return err
+	}
+
+	m.joinParty(c, payload.PartyID)
+	return nil
+}
+
+// Adds client to the given party, if possible
+func (m *Manager) joinParty(c *Client, partyID string) {
+	m.Lock()
+	defer m.Unlock()
+
+	// Client already in party
+	if c.inParty {
+		fmt.Println("You are already in a party!")
+		return
+	}
+
+	if party, exists := m.parties[partyID]; exists && party != nil {
+		if party.partySize < 2 {
+			party.addPartyClient(c)
+		} else {
+			// Party is full
+			fmt.Println("Party is full!")
+			return
+		}
+	} else {
+		// Party does not exist
+		fmt.Println("Party does not exist!")
+		return
+	}
+
+	fmt.Println("Here is an update of all the parties: ")
+	for id, party := range m.parties {
+		fmt.Printf("Party ID: %s, Number of Clients: %d\n", id, len(party.clients))
+	}
+
 }
 
 // Connects a client
