@@ -14,6 +14,7 @@ type ClientList map[*Client]bool
 type Client struct {
 	connection *websocket.Conn
 	manager    *Manager
+	party      *Party
 	inParty    bool
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
@@ -25,6 +26,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection: conn,
 		manager:    manager,
+		party:      nil,
 		inParty:    false,
 		egress:     make(chan Event),
 	}

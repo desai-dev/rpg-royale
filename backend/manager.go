@@ -79,13 +79,14 @@ func (m *Manager) createParty(client *Client) {
 	}
 
 	partyID := GenerateRandomString(10)
-	party := &Party{id: partyID, clients: []*Client{client}, partySize: 1}
+	party := &Party{id: partyID, players: []*Client{client}, playerPositions: make(map[*Client]Position), partySize: 1}
+	client.party = party
 	client.inParty = true
 	m.parties[partyID] = party
 
 	fmt.Println("Here is an update of all the parties: ")
 	for id, party := range m.parties {
-		fmt.Printf("Party ID: %s, Number of Clients: %d\n", id, len(party.clients))
+		fmt.Printf("Party ID: %s, Number of Players: %d\n", id, len(party.players))
 	}
 
 	responseEvent := Event{Type: "PARTY_CREATED", Payload: json.RawMessage(fmt.Sprintf(`{"partyID":"%s"}`, partyID))}
@@ -118,7 +119,9 @@ func (m *Manager) joinParty(c *Client, partyID string) {
 
 	if party, exists := m.parties[partyID]; exists && party != nil {
 		if party.partySize < 2 {
-			party.addPartyClient(c)
+			party.addPartyPlayer(c)
+			c.party = party
+			party.initializeGame() // start the game once theres two players in a party
 		} else {
 			// Party is full
 			fmt.Println("Party is full!")
@@ -132,7 +135,7 @@ func (m *Manager) joinParty(c *Client, partyID string) {
 
 	fmt.Println("Here is an update of all the parties: ")
 	for id, party := range m.parties {
-		fmt.Printf("Party ID: %s, Number of Clients: %d\n", id, len(party.clients))
+		fmt.Printf("Party ID: %s, Number of Players: %d\n", id, len(party.players))
 	}
 
 }
