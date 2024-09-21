@@ -1,6 +1,9 @@
+import { CanvasManager } from './canvasManager.js'
+
 export class WebSocketManager {
-  constructor(url) {
+  constructor(url, canvasCtx) {
     this.url = url;
+    this.canvasManager = new CanvasManager(canvasCtx)
     this.socket = null;
     this.connect();
   }
@@ -22,8 +25,8 @@ export class WebSocketManager {
     };
 
     this.socket.onmessage = (message) => {
-      const data = JSON.parse(message.data);
-      console.log("WebSocket message received: ", data);
+      const event = JSON.parse(message.data);
+      this.canvasManager.routeCanvasEvent(event);
     };
   }
 

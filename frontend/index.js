@@ -9,7 +9,9 @@ window.onload = function() {
 }
 
 // Connect to server
-const wsManager = new WebSocketManager("ws://localhost:8080/ws");
+const canvas = document.getElementById("myCanvas");
+const ctx = canvas.getContext("2d");
+const wsManager = new WebSocketManager("ws://localhost:8080/ws", ctx);
 
 // Send create party event when the create button is clicked
 var createButton = document.getElementById("create-button");

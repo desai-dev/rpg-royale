@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"math/rand/v2"
 )
 
 type PartyList map[string]*Party
@@ -12,14 +12,18 @@ type PartyList map[string]*Party
 type Party struct {
 	id              string
 	players         []*Client
-	playerPositions map[*Client]Position
+	playerPositions map[int]Position
 	partySize       int
 }
 
-// A position is an (x, y) coordinate
-type Position struct {
-	X int
-	Y int
+// Initializes a new Party
+func NewParty(partyID string) *Party {
+	return &Party{
+		id:              partyID,
+		players:         make([]*Client, 0),
+		playerPositions: make(map[int]Position),
+		partySize:       0,
+	}
 }
 
 // Add a player to the party
@@ -30,20 +34,32 @@ func (p *Party) addPartyPlayer(client *Client) {
 
 // Initialize the game
 func (p *Party) initializeGame() {
-	for _, player := range p.players {
-		// Set player postion
-		p.playerPositions[player] = Position{X: 100, Y: 100}
+	payload := NewGameStartPayload()
+	payload.PartyID = p.id
 
-		// JSONify position data
-		positionData, err := json.Marshal(p.playerPositions[player])
+	for i := 0; i < len(p.players); i++ {
+		// Set player's id for the current party
+		p.players[i].playerId = i
+
+		// Set player position
+		p.playerPositions[i] = Position{X: rand.IntN(100), Y: rand.IntN(100)}
+
+		playerData := NewPlayerData(p.playerPositions[i].X, p.playerPositions[i].Y, i)
+		payload.PlayersData = append(payload.PlayersData, playerData)
+	}
+
+	for _, player := range p.players {
+		payload.CurPlayerId = player.playerId
+
+		payloadBytes, err := json.Marshal(payload)
 		if err != nil {
-			log.Fatalf("error marshalling position data: %v", err)
+			fmt.Println("Error marshaling payload:", err)
+			return
 		}
 
-		// Send initialstate back to client
 		initialState := Event{
-			Type:    "GAME_START",
-			Payload: json.RawMessage(fmt.Sprintf(`{"partyID":"%s","position":%s}`, p.id, positionData)),
+			Type:    EventGameStart,
+			Payload: payloadBytes,
 		}
 
 		player.egress <- initialState

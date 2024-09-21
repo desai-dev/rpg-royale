@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 
 <html>
-  <head></head>
+  <head>
+    <style>
+      canvas {
+        background: black;
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
   <body>
     <button id="create-button">CREATE</button>
     <input id="partyid-input" type="text" />
     <button id="join-button">JOIN</button>
 
+    <canvas id="myCanvas" width="480" height="320"></canvas>
 
     <script src="index.js" type="module"></script>
   </body>

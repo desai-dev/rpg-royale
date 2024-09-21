@@ -16,6 +16,7 @@ type Client struct {
 	manager    *Manager
 	party      *Party
 	inParty    bool
+	playerId   int
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
 	egress chan Event
@@ -29,6 +30,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		party:      nil,
 		inParty:    false,
 		egress:     make(chan Event),
+		playerId:   0, // This value is properly set when a game starts
 	}
 }
 
@@ -83,7 +85,7 @@ func (c *Client) writeMessages() {
 				return
 			}
 
-			// In this case, the egress channel is still oppen
+			// In this case, the egress channel is still open
 			if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
 				log.Println(err)
 			}

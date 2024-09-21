@@ -60,7 +60,7 @@ func (m *Manager) routeEvent(event Event, c *Client) error {
 	}
 }
 
-// Create party even handler
+// Create party event handler
 func CreateParty(event Event, m *Manager, c *Client) error {
 	fmt.Println(event.Type)
 	m.createParty(c)
@@ -79,7 +79,8 @@ func (m *Manager) createParty(client *Client) {
 	}
 
 	partyID := GenerateRandomString(10)
-	party := &Party{id: partyID, players: []*Client{client}, playerPositions: make(map[*Client]Position), partySize: 1}
+	party := NewParty(partyID)
+	party.addPartyPlayer(client)
 	client.party = party
 	client.inParty = true
 	m.parties[partyID] = party
@@ -89,7 +90,18 @@ func (m *Manager) createParty(client *Client) {
 		fmt.Printf("Party ID: %s, Number of Players: %d\n", id, len(party.players))
 	}
 
-	responseEvent := Event{Type: "PARTY_CREATED", Payload: json.RawMessage(fmt.Sprintf(`{"partyID":"%s"}`, partyID))}
+	payload := NewPartyCreatedPayload(partyID)
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println("Error marshaling payload:", err)
+		return
+	}
+
+	responseEvent := Event{
+		Type:    EventPartyCreated,
+		Payload: payloadBytes,
+	}
+
 	client.egress <- responseEvent
 }
 
