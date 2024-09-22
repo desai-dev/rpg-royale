@@ -1,9 +1,9 @@
-import { CanvasManager } from './canvasManager.js'
+import { GameManager } from './gameManager.js'
 
 export class WebSocketManager {
   constructor(url, canvasCtx) {
     this.url = url;
-    this.canvasManager = new CanvasManager(canvasCtx)
+    this.gameManager = new GameManager()
     this.socket = null;
     this.connect();
   }
@@ -26,7 +26,7 @@ export class WebSocketManager {
 
     this.socket.onmessage = (message) => {
       const event = JSON.parse(message.data);
-      this.canvasManager.routeCanvasEvent(event);
+      this.gameManager.routeCanvasEvent(event);
     };
   }
 

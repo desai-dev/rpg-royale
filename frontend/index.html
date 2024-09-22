@@ -2,21 +2,27 @@
 
 <html>
   <head>
-    <style>
-      canvas {
-        background: black;
-        display: block;
-        margin: 0 auto;
-      }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <button id="create-button">CREATE</button>
-    <input id="partyid-input" type="text" />
-    <button id="join-button">JOIN</button>
+    <!-- Canvas -->
+    <canvas id="myCanvas"></canvas>
 
-    <canvas id="myCanvas" width="480" height="320"></canvas>
+    <!-- Modal + Overlay -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="gameModal">
+      <div class="modal-content">
+        <h1>RPG ROYALE</h1>
+        <button id="create-button">CREATE</button>
+        <button id="join-button">JOIN</button>
+        <input id="partyid-input" placeholder="PARTY CODE" type="text" />
+        <p id="party-code"></p>
+      </div>
+    </div>
 
     <script src="index.js" type="module"></script>
+    <script src="gameManager.js" type="module"></script>
   </body>
 </html>

@@ -7,10 +7,18 @@ window.onload = function() {
     alert("Websockets not supported!")
   }
 }
+window.addEventListener('resize', resizeCanvas);
 
-// Connect to server
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
+resizeCanvas();
+
+// Connect to server
 const wsManager = new WebSocketManager("ws://localhost:8080/ws", ctx);
 
 // Send create party event when the create button is clicked

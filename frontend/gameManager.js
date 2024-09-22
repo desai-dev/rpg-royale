@@ -1,18 +1,25 @@
-export class CanvasManager {
-  constructor(canvasCtx) {
-    this.canvas = canvasCtx
+export class GameManager {
+  constructor() {
+    const canvas = document.getElementById("myCanvas");
+    this.canvas = canvas.getContext("2d");
+    this.modal = document.getElementById('gameModal');
+    this.modalOverlay = document.getElementById('modalOverlay');
   }
 
   routeCanvasEvent(event) {
     console.log("WebSocket message received: ", event);
     if (event.type == "GAME_START") {
       this.handleGameStart(event.payload);
+    } else if (event.type == "PARTY_CREATED") {
+      this.handlePartyCreated(event.payload);
     } else {
       console.log("Not a game start event");
     }
   }
 
   handleGameStart(initialSettings) {
+    this.modal.style.display = 'none';
+    this.modalOverlay.style.display = 'none';
     const players = initialSettings.players;
     const curPlayerId = initialSettings.id;
 
@@ -33,4 +40,13 @@ export class CanvasManager {
       this.canvas.closePath();
     }
   }
+
+  handlePartyCreated(payload) {
+    const partyID = payload.partyID;
+    var partyCodeElement = document.getElementById("party-code");
+    partyCodeElement.style.visibility = 'visible';
+    partyCodeElement.textContent = 'PARTY CODE: ' + partyID;
+  }
+
+
 }

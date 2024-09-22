@@ -1,0 +1,45 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+canvas {
+  background: #AAEEFF;
+  display: block;
+  margin: 0 auto;
+}
+
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
+z-index: 9; /* Behind the modal */
+}
+
+.modal {
+display: flex;
+align-items: center;
+justify-content: center;
+position: fixed;
+top: 50%;
+left: 50%;
+width: 500px;
+height: 350px;
+background-color: #d4f3b7;
+border-radius: 10px;
+transform: translate(-50%, -50%); /* Center the modal */
+z-index: 10; /* Make sure it sits above the canvas */
+}
+
+.modal h1 {
+font-family: 'Courier New', Courier, monospace;
+}
+
+#party-code {
+visibility: hidden;
+height: 30px;
+}
