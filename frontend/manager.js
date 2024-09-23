@@ -1,9 +1,9 @@
 import { GameManager } from './gameManager.js'
 
 export class WebSocketManager {
-  constructor(url, canvasCtx) {
+  constructor(url) {
     this.url = url;
-    this.gameManager = new GameManager()
+    this.gameManager = new GameManager(this)
     this.socket = null;
     this.connect();
   }
@@ -26,13 +26,14 @@ export class WebSocketManager {
 
     this.socket.onmessage = (message) => {
       const event = JSON.parse(message.data);
-      this.gameManager.routeCanvasEvent(event);
+      this.gameManager.routeEvent(event);
     };
   }
 
   // Send events to server
   send(event) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      console.log(JSON.stringify(event));
       this.socket.send(JSON.stringify(event));
     } else {
       console.log("WebSocket is not open. Ready state is:", this.socket.readyState);

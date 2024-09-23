@@ -46,10 +46,12 @@ func NewManager() *Manager {
 func (m *Manager) setupEventHandlers() {
 	m.handlers[EventCreateParty] = CreateParty
 	m.handlers[EventJoinParty] = JoinParty
+	m.handlers[EventPlayerMoved] = PlayerMoved
 }
 
 // Routes an event to the correct handler, if possible
 func (m *Manager) routeEvent(event Event, c *Client) error {
+	fmt.Println(event.Type)
 	if handler, ok := m.handlers[event.Type]; ok {
 		if err := handler(event, m, c); err != nil {
 			return err
@@ -150,6 +152,42 @@ func (m *Manager) joinParty(c *Client, partyID string) {
 		fmt.Printf("Party ID: %s, Number of Players: %d\n", id, len(party.players))
 	}
 
+}
+
+func PlayerMoved(event Event, m *Manager, c *Client) error {
+	fmt.Println(event.Type)
+
+	var payload PlayerMovedPayload
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return err
+	}
+
+	m.playerMoved(c, payload)
+	return nil
+}
+
+func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
+	if client.party == nil {
+		fmt.Println("Client is not in a party, so how did player move?")
+		return
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println("Error marshaling payload:", err)
+		return
+	}
+
+	playerMoveEvent := Event{
+		Type:    EventPlayerMoved,
+		Payload: payloadBytes,
+	}
+
+	for _, player := range client.party.players {
+		if player.playerId != client.playerId {
+			player.egress <- playerMoveEvent
+		}
+	}
 }
 
 // Connects a client

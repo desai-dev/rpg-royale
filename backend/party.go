@@ -42,7 +42,7 @@ func (p *Party) initializeGame() {
 		p.players[i].playerId = i
 
 		// Set player position
-		p.playerPositions[i] = Position{X: rand.IntN(100), Y: rand.IntN(100)}
+		p.playerPositions[i] = Position{X: rand.Float64() * 100, Y: rand.Float64() * 100}
 
 		playerData := NewPlayerData(p.playerPositions[i].X, p.playerPositions[i].Y, i)
 		payload.PlayersData = append(payload.PlayersData, playerData)

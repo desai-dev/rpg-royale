@@ -12,6 +12,9 @@ type EventHandler func(event Event, m *Manager, c *Client) error
 
 // Event names
 const (
+	// Events that are the same for both the server and client
+	EventPlayerMoved = "PLAYER_MOVED"
+
 	// Events that come from client side
 	EventCreateParty = "CREATE_PARTY"
 	EventJoinParty   = "JOIN_PARTY"
@@ -20,6 +23,13 @@ const (
 	EventPartyCreated = "PARTY_CREATED"
 	EventGameStart    = "GAME_START"
 )
+
+// ************* PAYLOADS FOR RECIEVING/SENDING DATA FROM/TO CLIENT ************* //
+type PlayerMovedPayload struct {
+	PlayerId int     `json:"playerId"`
+	NewX     float64 `json:"x"`
+	NewY     float64 `json:"y"`
+}
 
 // ************* PAYLOADS FOR RECIEVING DATA FROM CLIENT ************* //
 
@@ -37,7 +47,7 @@ type PlayerData struct {
 }
 
 // Function to create PlayerData type
-func NewPlayerData(x int, y int, id int) PlayerData {
+func NewPlayerData(x float64, y float64, id int) PlayerData {
 	return PlayerData{
 		Position: Position{x, y},
 		PlayerId: id,
