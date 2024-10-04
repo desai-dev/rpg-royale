@@ -28,13 +28,13 @@ export class GameManager {
   }
 
   routeEvent(event) {
-    console.log("WebSocket message received: ", event);
+    // console.log("WebSocket message received: ", event);
     if (event.type == "GAME_START") {
       this.handleGameStart(event.payload);
     } else if (event.type == "PARTY_CREATED") {
       this.handlePartyCreated(event.payload);
-    } else if (event.type == "PLAYER_MOVED") {
-      this.handlePlayerMoved(event.payload)
+    } else if (event.type == "PLAYER_POSITIONS_UPDATE") {
+      this.handlePlayerPositionsUpdate(event.payload)
     } else {
       console.log("Not a game start event");
     }
@@ -77,9 +77,12 @@ export class GameManager {
     partyCodeElement.textContent = 'PARTY CODE: ' + partyID;
   }
 
-  handlePlayerMoved(payload) {
-    this.players[payload.playerId].position.x = payload.x
-    this.players[payload.playerId].position.y = payload.y
+  handlePlayerPositionsUpdate(payload) {
+    const players = payload.players;
+    for (const player of players) {
+      this.players[player.playerId].position.x = player.position.x
+      this.players[player.playerId].position.y = player.position.y
+    }
   }
 
   startGameLoop() {
@@ -93,35 +96,38 @@ export class GameManager {
       // Redraw frame
       this.draw();
 
-      requestAnimationFrame(loop);
+      requestAnimationFrame(loop); 
     };
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(loop); // Frequency of calls matches refresh rate
   }
 
   update(currentTime, deltaTime) {
     var moved = false;
+    var pressedKeys = []
     if (this.keys['ArrowLeft']) {
-      this.players[this.curPlayerId].position.x -= this.playerSpeedX * deltaTime;
+      pressedKeys.push('ArrowLeft')
+      // this.players[this.curPlayerId].position.x -= this.playerSpeedX * deltaTime;
       moved = true;
     }
     if (this.keys['ArrowRight']) {
-      this.players[this.curPlayerId].position.x += this.playerSpeedX * deltaTime;
+      pressedKeys.push('ArrowRight')
+      // this.players[this.curPlayerId].position.x += this.playerSpeedX * deltaTime;
       moved = true
     }
     
-    // Only send movement events every "sendRate" ms
-    if (moved && currentTime - this.lastSentTime > this.sendRate) {
+    // Send movement events to server
+    if (moved) {
+      console.log(pressedKeys)
       const updatedPosition = {
         playerId: this.curPlayerId,
-        x: this.players[this.curPlayerId].position.x,
-        y: this.players[this.curPlayerId].position.y
+        pressedKeys: pressedKeys,
+        timeSinceLastEvent: deltaTime,
       };
       const playerMoved = new CustomEvent("PLAYER_MOVED", updatedPosition)
       this.wsManager.send(playerMoved);
       this.lastSentTime = currentTime;
     } 
-
   }
 
   draw() {

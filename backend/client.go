@@ -17,6 +17,7 @@ type Client struct {
 	party      *Party
 	inParty    bool
 	playerId   int
+	position   Position
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
 	egress chan Event
@@ -29,9 +30,16 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		manager:    manager,
 		party:      nil,
 		inParty:    false,
+		position:   Position{X: 0, Y: 0}, // This value is properly set when a game starts
 		egress:     make(chan Event),
 		playerId:   0, // This value is properly set when a game starts
 	}
+}
+
+// Updates a Clients position to given x and y coordinates
+func (c *Client) updatePosition(x float64, y float64) {
+	c.position.X = x
+	c.position.Y = y
 }
 
 // Read messages from a client

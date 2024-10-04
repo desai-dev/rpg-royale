@@ -167,25 +167,12 @@ func PlayerMoved(event Event, m *Manager, c *Client) error {
 }
 
 func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
-	if client.party == nil {
-		fmt.Println("Client is not in a party, so how did player move?")
-		return
-	}
-
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println("Error marshaling payload:", err)
-		return
-	}
-
-	playerMoveEvent := Event{
-		Type:    EventPlayerMoved,
-		Payload: payloadBytes,
-	}
-
-	for _, player := range client.party.players {
-		if player.playerId != client.playerId {
-			player.egress <- playerMoveEvent
+	for _, key := range payload.PressedKeys {
+		fmt.Println(key)
+		if key == "ArrowLeft" {
+			client.updatePosition(client.position.X-(100*payload.TimeSinceLastEvent), client.position.Y)
+		} else if key == "ArrowRight" {
+			client.updatePosition(client.position.X+(100*payload.TimeSinceLastEvent), client.position.Y)
 		}
 	}
 }
