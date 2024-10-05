@@ -35,6 +35,19 @@ func (p *Party) addPartyPlayer(client *Client) {
 	p.partySize++
 }
 
+// Remove a player from the party
+func (p *Party) removePartyPlayer(client *Client) {
+	for i, player := range p.players {
+		if player == client {
+			// Remove the client from the players slice
+			p.players = append(p.players[:i], p.players[i+1:]...)
+			p.partySize--
+			break
+		}
+	}
+
+}
+
 // Initialize the game
 func (p *Party) initializeGame() {
 	payload := NewGameStartPayload()
@@ -61,7 +74,7 @@ func (p *Party) initializeGame() {
 			return
 		}
 
-		initialState := Event{
+		initialState := &Event{
 			Type:    EventGameStart,
 			Payload: payloadBytes,
 		}
@@ -98,7 +111,7 @@ func (p *Party) updatesClients() {
 		return
 	}
 
-	updatePosition := Event{
+	updatePosition := &Event{
 		Type:    EventUpdatePosition,
 		Payload: payloadBytes,
 	}

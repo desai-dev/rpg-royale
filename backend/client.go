@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -20,7 +21,7 @@ type Client struct {
 	position   Position
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
-	egress chan Event
+	egress chan *Event
 }
 
 // Initializes a new client
@@ -31,7 +32,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		party:      nil,
 		inParty:    false,
 		position:   Position{X: 0, Y: 0}, // This value is properly set when a game starts
-		egress:     make(chan Event),
+		egress:     make(chan *Event),
 		playerId:   0, // This value is properly set when a game starts
 	}
 }
@@ -45,7 +46,7 @@ func (c *Client) updatePosition(x float64, y float64) {
 // Read messages from a client
 func (c *Client) readMessages() {
 	defer func() {
-		c.manager.removeClient(c)
+		c.cleanupWsConnection()
 	}()
 
 	for {
@@ -55,7 +56,7 @@ func (c *Client) readMessages() {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error reading message: %v", err)
 			}
-			break
+			return
 		}
 
 		var request Event
@@ -72,32 +73,49 @@ func (c *Client) readMessages() {
 // writeMessages is a process that listens for new messages to output to the Client
 func (c *Client) writeMessages() {
 	defer func() {
-		c.manager.removeClient(c)
+		c.cleanupWsConnection()
 	}()
 
-	for {
-		select {
-		case message, ok := <-c.egress:
-			// Ok will be false if egress channel is closed
-			if !ok {
-				if err := c.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
-					log.Println("connection closed: ", err)
-				}
-				// Return to close the goroutine
+	// Continuously listen for messages from the egress channel
+	for message := range c.egress {
+		// If the channel is closed, break out of the loop and clean up
+		if message == nil {
+			if err := c.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
+				log.Println("connection closed: ", err)
 				return
-			}
-
-			data, err := json.Marshal(message)
-			if err != nil {
-				log.Println("error in marshalling ", err)
-				return
-			}
-
-			// In this case, the egress channel is still open
-			if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
-				log.Println(err)
 			}
 		}
 
+		// Marshal the message to JSON
+		data, err := json.Marshal(message)
+		if err != nil {
+			log.Println("error in marshalling: ", err)
+			return
+		}
+
+		// Write the message to the websocket connection
+		if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
+			log.Println("error writing message: ", err)
+		}
+	}
+}
+
+// Function to clean up after websocket connection closed by either client or server
+func (c *Client) cleanupWsConnection() {
+	// Remove client from list of clients
+	c.manager.removeClient(c)
+
+	// Remove client from party
+	if c.party != nil {
+		c.party.removePartyPlayer(c)
+		if c.party.partySize == 0 {
+			delete(c.manager.parties, c.party.id) // Delete party, and stop the parties game thread
+			c.party.stopGameTicker()              // if no players are in the party
+		}
+	}
+
+	fmt.Println("Here is an update of all the parties: ")
+	for id, party := range c.manager.parties {
+		fmt.Printf("Party ID: %s, Number of Players: %d\n", id, len(party.players))
 	}
 }

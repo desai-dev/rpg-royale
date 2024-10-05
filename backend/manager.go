@@ -99,7 +99,7 @@ func (m *Manager) createParty(client *Client) {
 		return
 	}
 
-	responseEvent := Event{
+	responseEvent := &Event{
 		Type:    EventPartyCreated,
 		Payload: payloadBytes,
 	}
