@@ -96,7 +96,7 @@ func (p *Party) startGameTicker() {
 		case <-ticker.C:
 			p.updatesClients() // Send updates to all clients
 		case <-p.stop:
-			fmt.Println("Stopping ticker for party")
+			fmt.Printf("Stopping ticker for party with id: %s", p.id)
 			return
 		}
 	}

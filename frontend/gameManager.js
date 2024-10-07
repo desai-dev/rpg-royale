@@ -11,9 +11,9 @@ export class GameManager {
     this.curPlayerId = null;
     this.playerSpeedX = 100;
     this.keys = {}; // Tracks keys that are pressed
-    this.lastFrameTime = 0; // Tracks last time a fram was fetched
+    this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
-    this.sendRate = 50; // How many ms between events sent to the server 
+    this.sendRate = 15; // How many ms between events sent to the server 
 
     // TODO: Increase sendRate and implement rate limiting
 
@@ -107,18 +107,17 @@ export class GameManager {
     var pressedKeys = []
     if (this.keys['ArrowLeft']) {
       pressedKeys.push('ArrowLeft')
-      // this.players[this.curPlayerId].position.x -= this.playerSpeedX * deltaTime;
+      this.players[this.curPlayerId].position.x -= this.playerSpeedX * deltaTime;
       moved = true;
     }
     if (this.keys['ArrowRight']) {
       pressedKeys.push('ArrowRight')
-      // this.players[this.curPlayerId].position.x += this.playerSpeedX * deltaTime;
+      this.players[this.curPlayerId].position.x += this.playerSpeedX * deltaTime;
       moved = true
     }
     
-    // Send movement events to server
-    if (moved) {
-      console.log(pressedKeys)
+    // Send movement events to server every "sendRate" ms
+    if (moved && currentTime - this.lastSentTime > this.sendRate) {
       const updatedPosition = {
         playerId: this.curPlayerId,
         pressedKeys: pressedKeys,
