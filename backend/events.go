@@ -20,9 +20,9 @@ const (
 	EventPlayerMoved = "PLAYER_MOVED"
 
 	// Events that come from server side
-	EventPartyCreated   = "PARTY_CREATED"
-	EventGameStart      = "GAME_START"
-	EventUpdatePosition = "PLAYER_POSITIONS_UPDATE"
+	EventPartyCreated  = "PARTY_CREATED"
+	EventGameStart     = "GAME_START"
+	EventUpdatePlayers = "PLAYERS_UPDATE"
 )
 
 // ************* PAYLOADS FOR RECIEVING/SENDING DATA FROM/TO CLIENT ************* //
@@ -39,21 +39,24 @@ type PlayerMovedPayload struct {
 	PlayerId           int      `json:"playerId"`
 	PressedKeys        []string `json:"pressedKeys"`
 	TimeSinceLastEvent float64  `json:"timeSinceLastEvent"`
+	InputNumber        int      `json:"inputNumber"`
 }
 
 // ************* PAYLOADS FOR SENDING DATA TO CLIENT ************* //
 
 // Payload structure for player data
 type PlayerData struct {
-	Position Position `json:"position"`
-	PlayerId int      `json:"playerId"`
+	Position    Position `json:"position"`
+	PlayerId    int      `json:"playerId"`
+	InputNumber int      `json:"inputNumber"`
 }
 
 // Function to create PlayerData type
-func NewPlayerData(x float64, y float64, id int) PlayerData {
+func NewPlayerData(x float64, y float64, id int, inputNumber int) PlayerData {
 	return PlayerData{
-		Position: Position{x, y},
-		PlayerId: id,
+		Position:    Position{x, y},
+		PlayerId:    id,
+		InputNumber: inputNumber,
 	}
 }
 
@@ -73,20 +76,20 @@ func NewGameStartPayload() GameStartPayload {
 	}
 }
 
-// Payload structure for PLAYER_POSITIONS_UPDATE event
-type PlayerPositionsPayload struct {
+// Payload structure for PLAYERS_UPDATE event
+type PlayersUpdatePayload struct {
 	PlayersData []PlayerData `json:"players"`
 }
 
-// Function to create PlayerPositionsPayload type
-func NewPlayerPositionsPayload(players []*Client) PlayerPositionsPayload {
+// Function to create PlayersUpdatePayload type
+func NewPlayersUpdatePayload(players []*Client) PlayersUpdatePayload {
 	data := []PlayerData{}
 
 	for _, player := range players {
-		playerData := NewPlayerData(player.position.X, player.position.Y, player.playerId)
+		playerData := NewPlayerData(player.position.X, player.position.Y, player.playerId, player.inputNumber)
 		data = append(data, playerData)
 	}
-	return PlayerPositionsPayload{
+	return PlayersUpdatePayload{
 		PlayersData: data,
 	}
 }

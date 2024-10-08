@@ -155,8 +155,6 @@ func (m *Manager) joinParty(c *Client, partyID string) {
 }
 
 func PlayerMoved(event Event, m *Manager, c *Client) error {
-	fmt.Println(event.Type)
-
 	var payload PlayerMovedPayload
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
 		return err
@@ -167,12 +165,12 @@ func PlayerMoved(event Event, m *Manager, c *Client) error {
 }
 
 func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
+	client.inputNumber = payload.InputNumber
 	for _, key := range payload.PressedKeys {
-		fmt.Println(key)
 		if key == "ArrowLeft" {
-			client.updatePosition(client.position.X-(100*payload.TimeSinceLastEvent), client.position.Y)
+			client.updatePosition(client.position.X-(float64(client.playerSpeedX)*payload.TimeSinceLastEvent), client.position.Y)
 		} else if key == "ArrowRight" {
-			client.updatePosition(client.position.X+(100*payload.TimeSinceLastEvent), client.position.Y)
+			client.updatePosition(client.position.X+(float64(client.playerSpeedX)*payload.TimeSinceLastEvent), client.position.Y)
 		}
 	}
 }

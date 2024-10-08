@@ -60,7 +60,7 @@ func (p *Party) initializeGame() {
 		// Set player position
 		p.players[i].updatePosition(rand.Float64()*100, rand.Float64()*100)
 
-		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, i)
+		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, i, -1)
 		payload.PlayersData = append(payload.PlayersData, playerData)
 	}
 
@@ -104,7 +104,7 @@ func (p *Party) startGameTicker() {
 
 // Function to send updates to all clients in the party
 func (p *Party) updatesClients() {
-	payload := NewPlayerPositionsPayload(p.players)
+	payload := NewPlayersUpdatePayload(p.players)
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		fmt.Println("Error marshaling payload:", err)
@@ -112,7 +112,7 @@ func (p *Party) updatesClients() {
 	}
 
 	updatePosition := &Event{
-		Type:    EventUpdatePosition,
+		Type:    EventUpdatePlayers,
 		Payload: payloadBytes,
 	}
 

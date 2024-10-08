@@ -8,6 +8,8 @@ export class GameManager {
     this.modal = document.getElementById('gameModal');
     this.modalOverlay = document.getElementById('modalOverlay');
     this.players = [];
+    this.playerInputs = [];
+    this.inputNumber = 0;
     this.curPlayerId = null;
     this.playerSpeedX = 100;
     this.keys = {}; // Tracks keys that are pressed
@@ -33,8 +35,8 @@ export class GameManager {
       this.handleGameStart(event.payload);
     } else if (event.type == "PARTY_CREATED") {
       this.handlePartyCreated(event.payload);
-    } else if (event.type == "PLAYER_POSITIONS_UPDATE") {
-      this.handlePlayerPositionsUpdate(event.payload)
+    } else if (event.type == "PLAYERS_UPDATE") {
+      this.handlePlayersUpdate(event.payload)
     } else {
       console.log("Not a game start event");
     }
@@ -77,11 +79,28 @@ export class GameManager {
     partyCodeElement.textContent = 'PARTY CODE: ' + partyID;
   }
 
-  handlePlayerPositionsUpdate(payload) {
+  handlePlayersUpdate(payload) {
     const players = payload.players;
     for (const player of players) {
+      // Update player positions
       this.players[player.playerId].position.x = player.position.x
       this.players[player.playerId].position.y = player.position.y
+
+      // Perform server reconciliation
+      if (player.playerId === this.curPlayerId) {
+        // Get index of latest event that server processed
+        const serverProccesedIndex = this.playerInputs.findIndex(input => {
+          return input.inputNumber === player.inputNumber
+        })
+        // Get rid of all events that were already processed
+        if (serverProccesedIndex > -1) {
+          this.playerInputs.splice(0, serverProccesedIndex + 1)
+        }
+        // Apply unprocessed events
+        this.playerInputs.forEach(input => {
+          this.players[player.playerId].position.x += input.dx
+        })
+      }
     }
   }
 
@@ -104,15 +123,18 @@ export class GameManager {
 
   update(currentTime, deltaTime) {
     var moved = false;
+    var dx = 0;
     var pressedKeys = []
     if (this.keys['ArrowLeft']) {
       pressedKeys.push('ArrowLeft')
       this.players[this.curPlayerId].position.x -= this.playerSpeedX * deltaTime;
+      dx = -this.playerSpeedX * deltaTime;
       moved = true;
     }
     if (this.keys['ArrowRight']) {
       pressedKeys.push('ArrowRight')
       this.players[this.curPlayerId].position.x += this.playerSpeedX * deltaTime;
+      dx = this.playerSpeedX * deltaTime;
       moved = true
     }
     
@@ -122,7 +144,10 @@ export class GameManager {
         playerId: this.curPlayerId,
         pressedKeys: pressedKeys,
         timeSinceLastEvent: deltaTime,
+        inputNumber: this.inputNumber,
       };
+      this.playerInputs.push({inputNumber: this.inputNumber, dx: dx})
+      this.inputNumber++
       const playerMoved = new CustomEvent("PLAYER_MOVED", updatedPosition)
       this.wsManager.send(playerMoved);
       this.lastSentTime = currentTime;

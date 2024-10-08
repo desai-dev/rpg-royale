@@ -13,12 +13,14 @@ type ClientList map[*Client]bool
 
 // A Client
 type Client struct {
-	connection *websocket.Conn
-	manager    *Manager
-	party      *Party
-	inParty    bool
-	playerId   int
-	position   Position
+	connection   *websocket.Conn
+	manager      *Manager
+	party        *Party
+	inParty      bool
+	playerId     int
+	position     Position
+	playerSpeedX int
+	inputNumber  int // Tracks how many inputs the server has processed
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
 	egress chan *Event
@@ -27,13 +29,15 @@ type Client struct {
 // Initializes a new client
 func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
-		connection: conn,
-		manager:    manager,
-		party:      nil,
-		inParty:    false,
-		position:   Position{X: 0, Y: 0}, // This value is properly set when a game starts
-		egress:     make(chan *Event),
-		playerId:   0, // This value is properly set when a game starts
+		connection:   conn,
+		manager:      manager,
+		party:        nil,
+		inParty:      false,
+		position:     Position{X: 0, Y: 0}, // This value is properly set when a game starts
+		playerSpeedX: 100,
+		egress:       make(chan *Event),
+		playerId:     0, // This value is properly set when a game starts
+		inputNumber:  0,
 	}
 }
 
