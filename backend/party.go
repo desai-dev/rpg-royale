@@ -50,7 +50,7 @@ func (p *Party) removePartyPlayer(client *Client) {
 
 // Initialize the game
 func (p *Party) initializeGame() {
-	payload := NewGameStartPayload()
+	payload := NewGameStartPayload(defaultMap)
 	payload.PartyID = p.id
 
 	for i := 0; i < len(p.players); i++ {

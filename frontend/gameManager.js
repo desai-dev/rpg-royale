@@ -1,4 +1,5 @@
 import { CustomEvent } from './event.js';
+import { CollisionBlock } from './collisionBlock.js'
 
 export class GameManager {
   constructor(wsManager) {
@@ -9,6 +10,7 @@ export class GameManager {
     this.modalOverlay = document.getElementById('modalOverlay');
     this.players = [];
     this.playerInputs = [];
+    this.collisionBlocks = []
     this.inputNumber = 0;
     this.curPlayerId = null;
     this.playerSpeedX = 100;
@@ -30,7 +32,6 @@ export class GameManager {
   }
 
   routeEvent(event) {
-    // console.log("WebSocket message received: ", event);
     if (event.type == "GAME_START") {
       this.handleGameStart(event.payload);
     } else if (event.type == "PARTY_CREATED") {
@@ -55,8 +56,6 @@ export class GameManager {
       var x_pos = player.position.x
       var y_pos = player.position.y
 
-      console.log("x_pos: " + x_pos + " y_pos: " + y_pos);
-
       this.canvas.beginPath();
       this.canvas.rect(x_pos, y_pos, 10, 10);
       if (this.curPlayerId == player.playerId) {
@@ -67,6 +66,15 @@ export class GameManager {
       this.canvas.fill();
       this.canvas.closePath();
     }
+
+    // Setup map
+    payload.map.forEach((coords) => {
+      console.log(coords);
+      this.collisionBlocks.push(new CollisionBlock(
+        {x: coords[0], y: coords[1]},
+        this.canvas
+      ))
+    })
 
     // Start game
     this.startGameLoop();
@@ -154,12 +162,23 @@ export class GameManager {
     } 
   }
 
-  draw() {
+  clearRect() {
+    this.canvas.save();
+    this.canvas.setTransform(1, 0, 0, 1, 0, 0);
     this.canvas.clearRect(0, 0, this.canvas.canvas.width, this.canvas.canvas.height);
+    this.canvas.restore();
+  }
+
+  draw() {
+    this.clearRect();
+
+    this.collisionBlocks.forEach(collisionBlock => {
+      collisionBlock.update()
+    })
 
     this.players.forEach(player => {
       this.canvas.beginPath();
-      this.canvas.rect(player.position.x, player.position.y, 10, 10);
+      this.canvas.rect(player.position.x, player.position.y, 60, 150);
       this.canvas.fillStyle = player.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
       this.canvas.fill();
       this.canvas.closePath();

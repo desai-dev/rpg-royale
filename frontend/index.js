@@ -8,14 +8,51 @@ window.onload = function() {
   }
 }
 
-// Resize canvas accoring to window size
-window.addEventListener('resize', resizeCanvas);
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
+// Resize canvas according to window size
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
+var nativeWidth = 1920; // Dimensions that the canvas 
+var nativeHeight = 1080; // will be optimized for
+
+window.addEventListener('resize', resizeCanvas);
+function resizeCanvas() {
+  var deviceWidth = window.innerWidth; 
+  var deviceHeight = window.innerHeight;
+  
+  var scaleFitNative = Math.min(deviceWidth / nativeWidth, deviceHeight / nativeHeight);
+
+  // Dimensions of the tile map
+  const tileSize = 30; 
+  const mapColumns = 64;
+  const mapRows = 36; 
+  const mapWidth = tileSize * mapColumns;
+  const mapHeight = tileSize * mapRows;
+
+  // Centers of the map and the canvas
+  const mapCenterX = mapWidth / 2;
+  const mapCenterY = mapHeight / 2;
+  const canvasCenterX = deviceWidth / 2;
+  const canvasCenterY = deviceHeight / 2;
+  
+  canvas.style.width = deviceWidth + "px";
+  canvas.style.height = deviceHeight + "px";
+  canvas.width = deviceWidth;
+  canvas.height = deviceHeight;
+  
+  if (scaleFitNative < 1) {
+    ctx.imageSmoothingEnabled = true;
+  } else{
+    ctx.imageSmoothingEnabled = false; 
+  }
+  
+  // Transformation to center the canvas
+  ctx.setTransform(
+    scaleFitNative,0,
+    0,scaleFitNative,
+    canvasCenterX - mapCenterX * scaleFitNative,
+    canvasCenterY - mapCenterY * scaleFitNative 
+  );
+}
 resizeCanvas();
 
 // Connect to server

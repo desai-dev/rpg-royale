@@ -62,17 +62,19 @@ func NewPlayerData(x float64, y float64, id int, inputNumber int) PlayerData {
 
 // Payload structure for GAME_START event
 type GameStartPayload struct {
-	PartyID     string       `json:"partyID"`
-	PlayersData []PlayerData `json:"players"`
-	CurPlayerId int          `json:"id"`
+	PartyID        string       `json:"partyID"`
+	PlayersData    []PlayerData `json:"players"`
+	CurPlayerId    int          `json:"id"`
+	MapCoordinates [][2]int     `json:"map"`
 }
 
 // Function to create GameStartPayload type
-func NewGameStartPayload() GameStartPayload {
+func NewGameStartPayload(gameMap [][2]int) GameStartPayload {
 	return GameStartPayload{
-		PartyID:     "",
-		PlayersData: []PlayerData{},
-		CurPlayerId: 0,
+		PartyID:        "",
+		PlayersData:    []PlayerData{},
+		CurPlayerId:    0,
+		MapCoordinates: gameMap,
 	}
 }
 
