@@ -1,5 +1,6 @@
 import { CustomEvent } from './event.js';
 import { CollisionBlock } from './collisionBlock.js'
+import { Player } from './player.js'
 
 export class GameManager {
   constructor(wsManager) {
@@ -13,7 +14,6 @@ export class GameManager {
     this.collisionBlocks = []
     this.inputNumber = 0;
     this.curPlayerId = null;
-    this.velocityX = 100;
     this.keys = {}; // Tracks keys that are pressed
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
@@ -52,19 +52,12 @@ export class GameManager {
     const players = payload.players;
     this.curPlayerId = payload.id;
     for (const player of players) {
-      this.players.push(player)
-      var x_pos = player.position.x
-      var y_pos = player.position.y
-
-      this.canvas.beginPath();
-      this.canvas.rect(x_pos, y_pos, 10, 10);
-      if (this.curPlayerId == player.playerId) {
-        this.canvas.fillStyle = "#0000FF";
-      } else {
-        this.canvas.fillStyle = "#FF0000";
-      }
-      this.canvas.fill();
-      this.canvas.closePath();
+      this.players.push(new Player(
+        player.playerId,
+        payload.id,
+        {x: player.position.x, y: player.position.y},
+        this.canvas
+      ))
     }
 
     // Setup map
@@ -135,14 +128,14 @@ export class GameManager {
     var pressedKeys = []
     if (this.keys['ArrowLeft']) {
       pressedKeys.push('ArrowLeft')
-      this.players[this.curPlayerId].position.x -= this.velocityX * deltaTime;
-      dx = -this.velocityX * deltaTime;
+      this.players[this.curPlayerId].position.x -= this.players[this.curPlayerId].velocityX * deltaTime;
+      dx = -this.players[this.curPlayerId].velocityX * deltaTime;
       moved = true;
     }
     if (this.keys['ArrowRight']) {
       pressedKeys.push('ArrowRight')
-      this.players[this.curPlayerId].position.x += this.velocityX * deltaTime;
-      dx = this.velocityX * deltaTime;
+      this.players[this.curPlayerId].position.x += this.players[this.curPlayerId].velocityX * deltaTime;
+      dx = this.players[this.curPlayerId].velocityX * deltaTime;
       moved = true
     }
     
@@ -176,12 +169,8 @@ export class GameManager {
       collisionBlock.update()
     })
 
-    this.players.forEach(player => {
-      this.canvas.beginPath();
-      this.canvas.rect(player.position.x, player.position.y, 60, 150);
-      this.canvas.fillStyle = player.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
-      this.canvas.fill();
-      this.canvas.closePath();
+    this.players.forEach(player => { 
+      player.update()
     });
   }
 }
