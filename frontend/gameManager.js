@@ -13,7 +13,7 @@ export class GameManager {
     this.collisionBlocks = []
     this.inputNumber = 0;
     this.curPlayerId = null;
-    this.playerSpeedX = 100;
+    this.velocityX = 100;
     this.keys = {}; // Tracks keys that are pressed
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
@@ -135,14 +135,14 @@ export class GameManager {
     var pressedKeys = []
     if (this.keys['ArrowLeft']) {
       pressedKeys.push('ArrowLeft')
-      this.players[this.curPlayerId].position.x -= this.playerSpeedX * deltaTime;
-      dx = -this.playerSpeedX * deltaTime;
+      this.players[this.curPlayerId].position.x -= this.velocityX * deltaTime;
+      dx = -this.velocityX * deltaTime;
       moved = true;
     }
     if (this.keys['ArrowRight']) {
       pressedKeys.push('ArrowRight')
-      this.players[this.curPlayerId].position.x += this.playerSpeedX * deltaTime;
-      dx = this.playerSpeedX * deltaTime;
+      this.players[this.curPlayerId].position.x += this.velocityX * deltaTime;
+      dx = this.velocityX * deltaTime;
       moved = true
     }
     

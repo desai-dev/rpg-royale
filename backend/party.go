@@ -11,21 +11,25 @@ type PartyList map[string]*Party
 
 // A 'Party' is a game party with two players at max
 type Party struct {
-	id        string
-	players   []*Client
-	partySize int
-	updateMs  int
-	stop      chan bool // Channel to stop the ticker
+	id           string
+	players      []*Client
+	partySize    int
+	gravity      float64
+	maxFallSpeed float64
+	updateMs     int
+	stop         chan bool // Channel to stop the ticker
 }
 
 // Initializes a new Party
 func NewParty(partyID string) *Party {
 	return &Party{
-		id:        partyID,
-		players:   make([]*Client, 0),
-		partySize: 0,
-		updateMs:  15,
-		stop:      make(chan bool),
+		id:           partyID,
+		players:      make([]*Client, 0),
+		partySize:    0,
+		gravity:      1,
+		maxFallSpeed: 15,
+		updateMs:     15,
+		stop:         make(chan bool),
 	}
 }
 
@@ -50,6 +54,7 @@ func (p *Party) removePartyPlayer(client *Client) {
 
 // Initialize the game
 func (p *Party) initializeGame() {
+	initializeDefaultMap()
 	payload := NewGameStartPayload(defaultMap)
 	payload.PartyID = p.id
 
@@ -104,6 +109,10 @@ func (p *Party) startGameTicker() {
 
 // Function to send updates to all clients in the party
 func (p *Party) updatesClients() {
+	// Apply gravity
+	p.applyGravity()
+
+	// Send player positions to client
 	payload := NewPlayersUpdatePayload(p.players)
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -118,6 +127,16 @@ func (p *Party) updatesClients() {
 
 	for _, player := range p.players {
 		player.egress <- updatePosition
+	}
+}
+
+func (p *Party) applyGravity() {
+	for _, player := range p.players {
+		player.velocityY += 0.5
+		if player.velocityY > p.maxFallSpeed {
+			player.velocityY = p.maxFallSpeed
+		}
+		player.position.Y += player.velocityY
 	}
 }
 

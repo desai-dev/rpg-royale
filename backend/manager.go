@@ -168,9 +168,9 @@ func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 	client.inputNumber = payload.InputNumber
 	for _, key := range payload.PressedKeys {
 		if key == "ArrowLeft" {
-			client.updatePosition(client.position.X-(float64(client.playerSpeedX)*payload.TimeSinceLastEvent), client.position.Y)
+			client.updatePosition(client.position.X-(client.velocityX*payload.TimeSinceLastEvent), client.position.Y)
 		} else if key == "ArrowRight" {
-			client.updatePosition(client.position.X+(float64(client.playerSpeedX)*payload.TimeSinceLastEvent), client.position.Y)
+			client.updatePosition(client.position.X+(client.velocityX*payload.TimeSinceLastEvent), client.position.Y)
 		}
 	}
 }
