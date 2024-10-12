@@ -57,9 +57,10 @@ func (p *Party) removePartyPlayer(client *Client) {
 // Initialize the game
 func (p *Party) initializeGame() {
 	initializeDefaultMap()
+	blockWidth := 30
+	blockHeight := 30
 	for _, collisionBlockCoords := range defaultMap {
-		// TODO: Get rid of magic numbers here
-		p.collisionBlocks = append(p.collisionBlocks, NewCollisionBlock(float64(collisionBlockCoords[0]*30), float64(collisionBlockCoords[1]*30)))
+		p.collisionBlocks = append(p.collisionBlocks, NewCollisionBlock(float64(blockWidth), float64(blockHeight), float64(collisionBlockCoords[0]*blockWidth), float64(collisionBlockCoords[1]*blockHeight)))
 	}
 	payload := NewGameStartPayload(defaultMap)
 	payload.PartyID = p.id

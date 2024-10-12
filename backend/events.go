@@ -36,10 +36,10 @@ type JoinPartyPayload struct {
 
 // Payload structure for PLAYER_MOVED event
 type PlayerMovedPayload struct {
-	PlayerId           int      `json:"playerId"`
-	PressedKeys        []string `json:"pressedKeys"`
-	TimeSinceLastEvent float64  `json:"timeSinceLastEvent"`
-	InputNumber        int      `json:"inputNumber"`
+	PlayerId           int     `json:"playerId"`
+	PressedKey         string  `json:"pressedKey"`
+	TimeSinceLastEvent float64 `json:"timeSinceLastEvent"`
+	InputNumber        int     `json:"inputNumber"`
 }
 
 // ************* PAYLOADS FOR SENDING DATA TO CLIENT ************* //

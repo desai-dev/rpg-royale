@@ -20,6 +20,7 @@ type Client struct {
 	playerId    int
 	position    Position
 	velocityX   float64
+	speedX      float64
 	velocityY   float64
 	height      float64
 	width       float64
@@ -37,6 +38,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		party:       nil,
 		inParty:     false,
 		position:    Position{X: 0, Y: 0}, // This value is properly set when a game starts
+		speedX:      500,
 		velocityX:   0,
 		velocityY:   5,
 		height:      150,

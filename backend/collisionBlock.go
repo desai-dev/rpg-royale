@@ -7,11 +7,11 @@ type CollisionBlock struct {
 }
 
 // Initializes a new collision block
-func NewCollisionBlock(x float64, y float64) *CollisionBlock {
+func NewCollisionBlock(width float64, height float64, x float64, y float64) *CollisionBlock {
 	return &CollisionBlock{
 		position: Position{X: x, Y: y},
-		width:    30,
-		height:   30,
+		width:    width,
+		height:   height,
 	}
 }
 

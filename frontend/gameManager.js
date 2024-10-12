@@ -15,6 +15,7 @@ export class GameManager {
     this.inputNumber = 0;
     this.curPlayerId = null;
     this.keys = {}; // Tracks keys that are pressed
+    this.lastMovementKeyPressed = ""
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
     this.sendRate = 15; // How many ms between events sent to the server 
@@ -24,6 +25,7 @@ export class GameManager {
     // Event listeners for key presses
     window.addEventListener('keydown', (event) => {
       this.keys[event.key] = true;
+      this.lastMovementKeyPressed = event.key
     });
 
     window.addEventListener('keyup', (event) => {
@@ -123,28 +125,42 @@ export class GameManager {
   }
 
   update(currentTime, deltaTime) {
-    var moved = false;
     var dx = 0;
-    var pressedKeys = []
+    var pressedKey = "";
     this.players[this.curPlayerId].velocityX = 0;
-    if (this.keys['ArrowLeft']) {
-      pressedKeys.push('ArrowLeft')
-      this.players[this.curPlayerId].velocityX = -500 * deltaTime;
+
+    // Move left
+    if (this.keys['ArrowLeft'] && !this.keys['ArrowRight']) {
+      pressedKey = "ArrowLeft";
+      this.players[this.curPlayerId].velocityX = -this.players[this.curPlayerId].speedX * deltaTime;
       dx = this.players[this.curPlayerId].velocityX;
-      moved = true;
     }
-    if (this.keys['ArrowRight']) {
-      pressedKeys.push('ArrowRight')
-      this.players[this.curPlayerId].velocityX = 500 * deltaTime;
-      dx = this.players[this.curPlayerId].velocityX; 
-      moved = true
+
+    // Move right
+    if (this.keys['ArrowRight'] && !this.keys['ArrowLeft']) {
+      pressedKey = "ArrowRight";
+      this.players[this.curPlayerId].velocityX = this.players[this.curPlayerId].speedX * deltaTime;
+      dx = this.players[this.curPlayerId].velocityX;
+    }
+
+    // Move in the direction of the last movement key press
+    if (this.keys['ArrowLeft'] && this.keys['ArrowRight']) {
+      if (this.lastMovementKeyPressed === "ArrowLeft") {
+        pressedKey = "ArrowLeft";
+        this.players[this.curPlayerId].velocityX = -this.players[this.curPlayerId].speedX * deltaTime;
+        dx = this.players[this.curPlayerId].velocityX;
+      } else if (this.lastMovementKeyPressed === "ArrowRight") {
+        pressedKey = "ArrowRight";
+        this.players[this.curPlayerId].velocityX = this.players[this.curPlayerId].speedX * deltaTime;
+        dx = this.players[this.curPlayerId].velocityX;
+      }
     }
 
     // Send movement events to server every "sendRate" ms
     if (currentTime - this.lastSentTime > this.sendRate) {
       const updatedPosition = {
         playerId: this.curPlayerId,
-        pressedKeys: pressedKeys,
+        pressedKey: pressedKey,
         timeSinceLastEvent: deltaTime,
         inputNumber: this.inputNumber,
       };

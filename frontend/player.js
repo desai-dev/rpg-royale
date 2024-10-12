@@ -3,6 +3,7 @@ export class Player {
     this.playerId = playerId
     this.curPlayerId = curPlayerId
     this.velocityX = 0;
+    this.speedX = 500;
     this.position = position
     this.canvas = canvas
     this.width = 60
