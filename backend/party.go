@@ -11,25 +11,27 @@ type PartyList map[string]*Party
 
 // A 'Party' is a game party with two players at max
 type Party struct {
-	id           string
-	players      []*Client
-	partySize    int
-	gravity      float64
-	maxFallSpeed float64
-	updateMs     int
-	stop         chan bool // Channel to stop the ticker
+	id              string
+	players         []*Client
+	collisionBlocks []*CollisionBlock
+	partySize       int
+	gravity         float64
+	maxFallSpeed    float64
+	updateMs        int
+	stop            chan bool // Channel to stop the ticker
 }
 
 // Initializes a new Party
 func NewParty(partyID string) *Party {
 	return &Party{
-		id:           partyID,
-		players:      make([]*Client, 0),
-		partySize:    0,
-		gravity:      1,
-		maxFallSpeed: 15,
-		updateMs:     15,
-		stop:         make(chan bool),
+		id:              partyID,
+		players:         make([]*Client, 0),
+		collisionBlocks: make([]*CollisionBlock, 0),
+		partySize:       0,
+		gravity:         0.5,
+		maxFallSpeed:    30,
+		updateMs:        15,
+		stop:            make(chan bool),
 	}
 }
 
@@ -55,6 +57,10 @@ func (p *Party) removePartyPlayer(client *Client) {
 // Initialize the game
 func (p *Party) initializeGame() {
 	initializeDefaultMap()
+	for _, collisionBlockCoords := range defaultMap {
+		// TODO: Get rid of magic numbers here
+		p.collisionBlocks = append(p.collisionBlocks, NewCollisionBlock(float64(collisionBlockCoords[0]*30), float64(collisionBlockCoords[1]*30)))
+	}
 	payload := NewGameStartPayload(defaultMap)
 	payload.PartyID = p.id
 
@@ -63,7 +69,7 @@ func (p *Party) initializeGame() {
 		p.players[i].playerId = i
 
 		// Set player position
-		p.players[i].updatePosition(rand.Float64()*100, rand.Float64()*100)
+		p.players[i].updatePosition(rand.Float64()*1000, 0)
 
 		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, i, -1)
 		payload.PlayersData = append(payload.PlayersData, playerData)
@@ -109,8 +115,17 @@ func (p *Party) startGameTicker() {
 
 // Function to send updates to all clients in the party
 func (p *Party) updatesClients() {
+	// Update client positions
+	p.updateClientPositions()
+
+	// Check horizontal collisions
+	p.checkHorizontalCollisions()
+
 	// Apply gravity
 	p.applyGravity()
+
+	// Check vertical collisions
+	p.checkVerticalCollisions()
 
 	// Send player positions to client
 	payload := NewPlayersUpdatePayload(p.players)
@@ -130,13 +145,57 @@ func (p *Party) updatesClients() {
 	}
 }
 
+// Updates clients positions based on velocity
+func (p *Party) updateClientPositions() {
+	for _, player := range p.players {
+		player.updatePosition(player.position.X+player.velocityX, player.position.Y)
+	}
+}
+
+// Applies gravity to players
 func (p *Party) applyGravity() {
 	for _, player := range p.players {
-		player.velocityY += 0.5
+		player.velocityY += p.gravity
 		if player.velocityY > p.maxFallSpeed {
 			player.velocityY = p.maxFallSpeed
 		}
 		player.position.Y += player.velocityY
+	}
+}
+
+// Checks for vertical collisions
+func (p *Party) checkVerticalCollisions() {
+	for _, player := range p.players {
+		for _, block := range p.collisionBlocks {
+			if CheckCollision(player, block) {
+				if player.velocityY > 0 {
+					player.velocityY = 0
+					player.updatePosition(player.position.X, block.position.Y-player.height-0.01)
+				}
+				if player.velocityY < 0 {
+					player.velocityY = 0
+					player.updatePosition(player.position.X, block.position.Y+player.height+0.01)
+				}
+			}
+		}
+	}
+}
+
+// Checks for horizontal collisions
+func (p *Party) checkHorizontalCollisions() {
+	for _, player := range p.players {
+		for _, block := range p.collisionBlocks {
+			if CheckCollision(player, block) {
+				if player.velocityX > 0 {
+					player.velocityX = 0
+					player.updatePosition(block.position.X-player.width-0.01, player.position.Y)
+				}
+				if player.velocityX < 0 {
+					player.velocityX = 0
+					player.updatePosition(block.position.X+block.width+0.01, player.position.Y)
+				}
+			}
+		}
 	}
 }
 

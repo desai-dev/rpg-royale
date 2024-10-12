@@ -126,21 +126,22 @@ export class GameManager {
     var moved = false;
     var dx = 0;
     var pressedKeys = []
+    this.players[this.curPlayerId].velocityX = 0;
     if (this.keys['ArrowLeft']) {
       pressedKeys.push('ArrowLeft')
-      this.players[this.curPlayerId].position.x -= this.players[this.curPlayerId].velocityX * deltaTime;
-      dx = -this.players[this.curPlayerId].velocityX * deltaTime;
+      this.players[this.curPlayerId].velocityX = -500 * deltaTime;
+      dx = this.players[this.curPlayerId].velocityX;
       moved = true;
     }
     if (this.keys['ArrowRight']) {
       pressedKeys.push('ArrowRight')
-      this.players[this.curPlayerId].position.x += this.players[this.curPlayerId].velocityX * deltaTime;
-      dx = this.players[this.curPlayerId].velocityX * deltaTime;
+      this.players[this.curPlayerId].velocityX = 500 * deltaTime;
+      dx = this.players[this.curPlayerId].velocityX; 
       moved = true
     }
-    
+
     // Send movement events to server every "sendRate" ms
-    if (moved && currentTime - this.lastSentTime > this.sendRate) {
+    if (currentTime - this.lastSentTime > this.sendRate) {
       const updatedPosition = {
         playerId: this.curPlayerId,
         pressedKeys: pressedKeys,

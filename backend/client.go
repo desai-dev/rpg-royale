@@ -21,6 +21,8 @@ type Client struct {
 	position    Position
 	velocityX   float64
 	velocityY   float64
+	height      float64
+	width       float64
 	inputNumber int // Tracks how many inputs the server has processed
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
@@ -35,8 +37,10 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		party:       nil,
 		inParty:     false,
 		position:    Position{X: 0, Y: 0}, // This value is properly set when a game starts
-		velocityX:   100,
+		velocityX:   0,
 		velocityY:   5,
+		height:      150,
+		width:       60,
 		egress:      make(chan *Event),
 		playerId:    0, // This value is properly set when a game starts
 		inputNumber: 0,
@@ -125,3 +129,19 @@ func (c *Client) cleanupWsConnection() {
 		fmt.Printf("Party ID: %s, Number of Players: %d\n", id, len(party.players))
 	}
 }
+
+//////// ******** Functions for Collider interface implementation ******** ////////
+
+func (c *Client) Position() Position {
+	return c.position
+}
+
+func (c *Client) Width() float64 {
+	return c.width
+}
+
+func (c *Client) Height() float64 {
+	return c.height
+}
+
+//////// ******** End of Functions for Collider interface implementation ******** ////////

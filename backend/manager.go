@@ -165,12 +165,17 @@ func PlayerMoved(event Event, m *Manager, c *Client) error {
 }
 
 func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
+	// TODO: Get rid of magic numbers here
 	client.inputNumber = payload.InputNumber
+	if len(payload.PressedKeys) == 0 {
+		client.velocityX = 0
+		return
+	}
 	for _, key := range payload.PressedKeys {
 		if key == "ArrowLeft" {
-			client.updatePosition(client.position.X-(client.velocityX*payload.TimeSinceLastEvent), client.position.Y)
+			client.velocityX = -500 * payload.TimeSinceLastEvent
 		} else if key == "ArrowRight" {
-			client.updatePosition(client.position.X+(client.velocityX*payload.TimeSinceLastEvent), client.position.Y)
+			client.velocityX = 500 * payload.TimeSinceLastEvent
 		}
 	}
 }
