@@ -50,18 +50,6 @@ export class GameManager {
     this.modal.style.display = 'none';
     this.modalOverlay.style.display = 'none';
 
-    // Spawn players
-    const players = payload.players;
-    this.curPlayerId = payload.id;
-    for (const player of players) {
-      this.players.push(new Player(
-        player.playerId,
-        payload.id,
-        {x: player.position.x, y: player.position.y},
-        this.canvas
-      ))
-    }
-
     // Setup map
     payload.map.forEach((coords) => {
       console.log(coords);
@@ -70,6 +58,19 @@ export class GameManager {
         this.canvas
       ))
     })
+
+    // Spawn players
+    const players = payload.players;
+    this.curPlayerId = payload.id;
+    for (const player of players) {
+      this.players.push(new Player(
+        player.playerId,
+        payload.id,
+        {x: player.position.x, y: player.position.y},
+        this.collisionBlocks,
+        this.canvas
+      ))
+    }
 
     // Start game
     this.startGameLoop();
