@@ -51,7 +51,6 @@ func (m *Manager) setupEventHandlers() {
 
 // Routes an event to the correct handler, if possible
 func (m *Manager) routeEvent(event Event, c *Client) error {
-	fmt.Println(event.Type)
 	if handler, ok := m.handlers[event.Type]; ok {
 		if err := handler(event, m, c); err != nil {
 			return err
@@ -64,7 +63,6 @@ func (m *Manager) routeEvent(event Event, c *Client) error {
 
 // Create party event handler
 func CreateParty(event Event, m *Manager, c *Client) error {
-	fmt.Println(event.Type)
 	m.createParty(c)
 	return nil
 }
@@ -109,8 +107,6 @@ func (m *Manager) createParty(client *Client) {
 
 // Join party event handler
 func JoinParty(event Event, m *Manager, c *Client) error {
-	fmt.Println(event.Type)
-
 	var payload JoinPartyPayload
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
 		return err

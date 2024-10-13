@@ -41,7 +41,7 @@ export class GameManager {
     } else if (event.type == "PLAYERS_UPDATE") {
       this.handlePlayersUpdate(event.payload)
     } else {
-      console.log("Not a game start event");
+      console.log("Not an event");
     }
   }
 
@@ -52,7 +52,6 @@ export class GameManager {
 
     // Setup map
     payload.map.forEach((coords) => {
-      console.log(coords);
       this.collisionBlocks.push(new CollisionBlock(
         {x: coords[0], y: coords[1]},
         this.canvas
