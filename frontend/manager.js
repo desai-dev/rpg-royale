@@ -33,7 +33,6 @@ export class WebSocketManager {
   // Send events to server
   send(event) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      console.log(JSON.stringify(event));
       this.socket.send(JSON.stringify(event));
     } else {
       console.log("WebSocket is not open. Ready state is:", this.socket.readyState);

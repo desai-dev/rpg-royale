@@ -5,6 +5,9 @@ export class Player {
     this.playerId = playerId;
     this.curPlayerId = curPlayerId;
     this.velocityX = 0;
+    this.velocityY = 5;
+    this.gravity = 0.5;
+    this.maxFallSpeed = 30;
     this.speedX = 500;
     this.position = position;
     this.collisionBlocks = collisionBlocks;
@@ -28,12 +31,43 @@ export class Player {
     });
   }
 
+  applyGravity() {
+    this.velocityY += this.gravity
+		if (this.velocityY > this.maxFallSpeed) {
+			this.velocityY = this.maxFallSpeed;
+		}
+		this.position.y += this.velocityY;
+  }
+
+  checkVerticalCollisions() {
+    this.collisionBlocks.forEach(block => {
+      if (checkCollision(this, block)) {
+				if (this.velocityY > 0) {
+					this.velocityY = 0;
+					this.position.y = block.position.y - this.height - 0.01;
+				}
+				if (this.velocityY < 0) {
+					this.velocityY = 0;
+					this.position.y  = block.position.y + this.height + 0.01;
+				}
+      }
+    });
+  }
+
   draw() {
-    this.position.x += this.velocityX // update position
-    // check horizontal collision
+    // Update position
+    this.position.x += this.velocityX
+
+    // Check horizontal collision
     this.checkHorizontalCollisions()
-    // apply gravity
-    // check vertical collision
+
+    // Apply gravity
+    this.applyGravity()
+
+    // Check vertical collision
+    this.checkVerticalCollisions()
+
+    // Draw player
     this.canvas.beginPath();
     this.canvas.rect(this.position.x, this.position.y, 60, 150);
     this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
