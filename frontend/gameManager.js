@@ -102,6 +102,7 @@ export class GameManager {
         // Apply unprocessed events
         this.playerInputs.forEach(input => {
           this.players[player.playerId].position.x += input.dx
+          this.players[player.playerId].position.y += input.dy
         })
       }
     }
@@ -126,19 +127,20 @@ export class GameManager {
 
   update(currentTime, deltaTime) {
     var dx = 0;
-    var pressedKey = "";
+    var dy = 0;
+    var pressedKeys = [];
     this.players[this.curPlayerId].velocityX = 0;
 
     // Move left
     if (this.keys['ArrowLeft'] && !this.keys['ArrowRight']) {
-      pressedKey = "ArrowLeft";
+      pressedKeys.push("ArrowLeft");
       this.players[this.curPlayerId].velocityX = -this.players[this.curPlayerId].speedX * deltaTime;
       dx = this.players[this.curPlayerId].velocityX;
     }
 
     // Move right
     if (this.keys['ArrowRight'] && !this.keys['ArrowLeft']) {
-      pressedKey = "ArrowRight";
+      pressedKeys.push("ArrowRight");
       this.players[this.curPlayerId].velocityX = this.players[this.curPlayerId].speedX * deltaTime;
       dx = this.players[this.curPlayerId].velocityX;
     }
@@ -146,25 +148,33 @@ export class GameManager {
     // Move in the direction of the last movement key press
     if (this.keys['ArrowLeft'] && this.keys['ArrowRight']) {
       if (this.lastMovementKeyPressed === "ArrowLeft") {
-        pressedKey = "ArrowLeft";
+        pressedKeys.push("ArrowLeft");
         this.players[this.curPlayerId].velocityX = -this.players[this.curPlayerId].speedX * deltaTime;
         dx = this.players[this.curPlayerId].velocityX;
       } else if (this.lastMovementKeyPressed === "ArrowRight") {
-        pressedKey = "ArrowRight";
+        pressedKeys.push("ArrowRight");
         this.players[this.curPlayerId].velocityX = this.players[this.curPlayerId].speedX * deltaTime;
         dx = this.players[this.curPlayerId].velocityX;
       }
+    }
+
+    // Jump
+    if (this.keys['ArrowUp'] && this.players[this.curPlayerId].isGrounded) {
+      this.players[this.curPlayerId].isGrounded = false;
+      pressedKeys.push("ArrowUp");
+      this.players[this.curPlayerId].velocityY = this.players[this.curPlayerId].jumpPower * deltaTime;
+      dy = this.players[this.curPlayerId].velocityY
     }
 
     // Send movement events to server every "sendRate" ms
     if (currentTime - this.lastSentTime > this.sendRate) {
       const updatedPosition = {
         playerId: this.curPlayerId,
-        pressedKey: pressedKey,
+        pressedKeys: pressedKeys,
         timeSinceLastEvent: deltaTime,
         inputNumber: this.inputNumber,
       };
-      this.playerInputs.push({inputNumber: this.inputNumber, dx: dx})
+      this.playerInputs.push({inputNumber: this.inputNumber, dx: dx, dy: dy})
       this.inputNumber++
       const playerMoved = new CustomEvent("PLAYER_MOVED", updatedPosition)
       this.wsManager.send(playerMoved);

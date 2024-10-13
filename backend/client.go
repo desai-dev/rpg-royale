@@ -22,6 +22,8 @@ type Client struct {
 	velocityX   float64
 	speedX      float64
 	velocityY   float64
+	jumpPower   float64
+	isGrounded  bool
 	height      float64
 	width       float64
 	inputNumber int // Tracks how many inputs the server has processed
@@ -40,7 +42,9 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		position:    Position{X: 0, Y: 0}, // This value is properly set when a game starts
 		speedX:      500,
 		velocityX:   0,
-		velocityY:   5,
+		velocityY:   0,
+		jumpPower:   -800,
+		isGrounded:  true,
 		height:      150,
 		width:       60,
 		egress:      make(chan *Event),

@@ -172,10 +172,11 @@ func (p *Party) checkVerticalCollisions() {
 				if player.velocityY > 0 {
 					player.velocityY = 0
 					player.updatePosition(player.position.X, block.position.Y-player.height-0.01)
+					player.isGrounded = true
 				}
 				if player.velocityY < 0 {
 					player.velocityY = 0
-					player.updatePosition(player.position.X, block.position.Y+player.height+0.01)
+					player.updatePosition(player.position.X, block.position.Y+block.height+0.01)
 				}
 			}
 		}

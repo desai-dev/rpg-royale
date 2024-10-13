@@ -5,11 +5,13 @@ export class Player {
     this.playerId = playerId;
     this.curPlayerId = curPlayerId;
     this.velocityX = 0;
-    this.velocityY = 5;
+    this.velocityY = 0;
+    this.jumpPower = -800;
     this.gravity = 0.5;
     this.maxFallSpeed = 30;
     this.speedX = 500;
     this.position = position;
+    this.isGrounded = true;
     this.collisionBlocks = collisionBlocks;
     this.canvas = canvas;
     this.width = 60;
@@ -45,10 +47,11 @@ export class Player {
 				if (this.velocityY > 0) {
 					this.velocityY = 0;
 					this.position.y = block.position.y - this.height - 0.01;
+          this.isGrounded = true;
 				}
 				if (this.velocityY < 0) {
 					this.velocityY = 0;
-					this.position.y  = block.position.y + this.height + 0.01;
+					this.position.y  = block.position.y + block.height + 0.01;
 				}
       }
     });

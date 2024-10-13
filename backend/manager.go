@@ -162,12 +162,17 @@ func PlayerMoved(event Event, m *Manager, c *Client) error {
 
 func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 	client.inputNumber = payload.InputNumber
-	if payload.PressedKey == "" {
-		client.velocityX = 0
-	} else if payload.PressedKey == "ArrowLeft" {
-		client.velocityX = -client.speedX * payload.TimeSinceLastEvent
-	} else if payload.PressedKey == "ArrowRight" {
-		client.velocityX = client.speedX * payload.TimeSinceLastEvent
+	client.velocityX = 0
+
+	for _, key := range payload.PressedKeys {
+		if key == "ArrowLeft" {
+			client.velocityX = -client.speedX * payload.TimeSinceLastEvent
+		} else if key == "ArrowRight" {
+			client.velocityX = client.speedX * payload.TimeSinceLastEvent
+		} else if key == "ArrowUp" && client.isGrounded {
+			client.isGrounded = false
+			client.velocityY = client.jumpPower * payload.TimeSinceLastEvent
+		}
 	}
 }
 
