@@ -47,6 +47,7 @@ func (m *Manager) setupEventHandlers() {
 	m.handlers[EventCreateParty] = CreateParty
 	m.handlers[EventJoinParty] = JoinParty
 	m.handlers[EventPlayerMoved] = PlayerMoved
+	m.handlers[EventBulletFired] = BulletFired
 }
 
 // Routes an event to the correct handler, if possible
@@ -166,14 +167,30 @@ func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 
 	for _, key := range payload.PressedKeys {
 		if key == "ArrowLeft" {
+			client.lastXMovement = key
 			client.velocityX = -client.speedX * payload.TimeSinceLastEvent
 		} else if key == "ArrowRight" {
+			client.lastXMovement = key
 			client.velocityX = client.speedX * payload.TimeSinceLastEvent
 		} else if key == "ArrowUp" && client.isGrounded {
 			client.isGrounded = false
 			client.velocityY = client.jumpPower * payload.TimeSinceLastEvent
 		}
 	}
+}
+
+func BulletFired(event Event, m *Manager, c *Client) error {
+	var payload BulletFiredPayload
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return err
+	}
+
+	m.bulletFired(c, payload)
+	return nil
+}
+
+func (m *Manager) bulletFired(client *Client, payload BulletFiredPayload) {
+	client.party.fireBullet(payload.PlayerId, payload.TimeSinceLastEvent)
 }
 
 // Connects a client

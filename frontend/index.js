@@ -11,8 +11,8 @@ window.onload = function() {
 // Resize canvas according to window size
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
-var nativeWidth = 1920; // Dimensions that the canvas 
-var nativeHeight = 1080; // will be optimized for
+export const nativeWidth = 1920; // Dimensions that the canvas 
+export const nativeHeight = 1080; // will be optimized for
 
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {

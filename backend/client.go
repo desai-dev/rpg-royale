@@ -13,20 +13,22 @@ type ClientList map[*Client]bool
 
 // A Client
 type Client struct {
-	connection  *websocket.Conn
-	manager     *Manager
-	party       *Party
-	inParty     bool
-	playerId    int
-	position    Position
-	velocityX   float64
-	speedX      float64
-	velocityY   float64
-	jumpPower   float64
-	isGrounded  bool
-	height      float64
-	width       float64
-	inputNumber int // Tracks how many inputs the server has processed
+	connection    *websocket.Conn
+	manager       *Manager
+	party         *Party
+	inParty       bool
+	playerId      int
+	position      Position
+	velocityX     float64
+	speedX        float64
+	velocityY     float64
+	lastXMovement string
+	jumpPower     float64
+	isGrounded    bool
+	health        float64
+	height        float64
+	width         float64
+	inputNumber   int // Tracks how many inputs the server has processed
 	// egress is used to avoid concurrent writes on the WebSocket
 	// since gorilla only allows one concurrent writer
 	egress chan *Event
@@ -35,21 +37,23 @@ type Client struct {
 // Initializes a new client
 func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
-		connection:  conn,
-		manager:     manager,
-		party:       nil,
-		inParty:     false,
-		position:    Position{X: 0, Y: 0}, // This value is properly set when a game starts
-		speedX:      500,
-		velocityX:   0,
-		velocityY:   0,
-		jumpPower:   -800,
-		isGrounded:  true,
-		height:      150,
-		width:       60,
-		egress:      make(chan *Event),
-		playerId:    0, // This value is properly set when a game starts
-		inputNumber: 0,
+		connection:    conn,
+		manager:       manager,
+		party:         nil,
+		inParty:       false,
+		position:      Position{X: 0, Y: 0}, // This value is properly set when a game starts
+		speedX:        500,
+		velocityX:     0,
+		velocityY:     0,
+		lastXMovement: "",
+		jumpPower:     -800,
+		isGrounded:    true,
+		health:        100,
+		height:        150,
+		width:         60,
+		egress:        make(chan *Event),
+		playerId:      0, // This value is properly set when a game starts
+		inputNumber:   0,
 	}
 }
 

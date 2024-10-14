@@ -12,6 +12,7 @@ export class Player {
     this.speedX = 500;
     this.position = position;
     this.isGrounded = true;
+    this.health = 100;
     this.collisionBlocks = collisionBlocks;
     this.canvas = canvas;
     this.width = 60;
@@ -71,11 +72,13 @@ export class Player {
     this.checkVerticalCollisions()
 
     // Draw player
-    this.canvas.beginPath();
-    this.canvas.rect(this.position.x, this.position.y, 60, 150);
-    this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
-    this.canvas.fill();
-    this.canvas.closePath();
+    if (this.health > 0) {
+      this.canvas.beginPath();
+      this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
+      this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
+      this.canvas.fill();
+      this.canvas.closePath();
+    }
   }
 
   update() {
