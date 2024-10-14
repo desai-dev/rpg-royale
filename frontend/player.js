@@ -16,6 +16,10 @@ export class Player {
     this.canvas = canvas;
     this.width = 60;
     this.height = 150;
+
+    const image = new Image();
+    image.src = this.playerId === this.curPlayerId ? "../blueTank.png" : "../redTank.png";
+    this.image = image;
   }
 
   checkHorizontalCollisions() {
@@ -57,6 +61,8 @@ export class Player {
     });
   }
 
+  
+
   draw() {
     // Update position
     this.position.x += this.velocityX
@@ -71,11 +77,15 @@ export class Player {
     this.checkVerticalCollisions()
 
     // Draw player
+    this.image.height = 150
+    this.image.width = 150
     this.canvas.beginPath();
-    this.canvas.rect(this.position.x, this.position.y, 60, 150);
+    this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
     this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
     this.canvas.fill();
     this.canvas.closePath();
+    this.canvas.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+
   }
 
   update() {
