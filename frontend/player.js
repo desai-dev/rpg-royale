@@ -1,4 +1,5 @@
 import { checkCollision } from "./collision.js";
+import { settings } from './settings.js'
 
 export class Player {
   constructor(playerId, curPlayerId, position, collisionBlocks, canvas) {
@@ -6,17 +7,17 @@ export class Player {
     this.curPlayerId = curPlayerId;
     this.velocityX = 0;
     this.velocityY = 0;
-    this.jumpPower = -800;
-    this.gravity = 0.5;
-    this.maxFallSpeed = 30;
-    this.speedX = 500;
+    this.jumpPower = settings.player.jumpPower;
+    this.gravity = settings.game.gravityConstant;
+    this.maxFallSpeed = settings.player.maxFallSpeed;
+    this.speedX = settings.player.speedX;
     this.position = position;
-    this.isGrounded = true;
-    this.health = 100;
+    this.isGrounded = false;
+    this.health = settings.player.health;
     this.collisionBlocks = collisionBlocks;
     this.canvas = canvas;
-    this.width = 60;
-    this.height = 150;
+    this.width = settings.player.width;
+    this.height = settings.player.height;
   }
 
   checkHorizontalCollisions() {

@@ -1,11 +1,12 @@
-import { nativeWidth } from "./index.js"
+import { settings } from "./settings.js";
+
 export class Bullet {
   constructor(position, velocityX, canvas) {
     this.velocityX = velocityX;
     this.position = position;
     this.canvas = canvas;
-    this.width = 30;
-    this.height = 30;
+    this.width = settings.bullet.width;
+    this.height = settings.bullet.height;
   }
 
   // Draws a bullet and returns whether or not that bullet is off the screen
@@ -13,7 +14,7 @@ export class Bullet {
     this.position.x += this.velocityX
 
     // If bullet off the screen, remove it
-    if (this.position.x < 0 || this.position.x > nativeWidth) {
+    if (this.position.x < 0 || this.position.x > settings.game.nativeWidth) {
       return false;
     }
 

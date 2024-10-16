@@ -34,9 +34,9 @@ func NewParty(partyID string) *Party {
 		bullets:         make([]*Bullet, 0),
 		unsentBullets:   make([]*Bullet, 0),
 		partySize:       0,
-		gravity:         0.5,
-		maxFallSpeed:    30,
-		updateMs:        15,
+		gravity:         gravityConstant,
+		maxFallSpeed:    playerMaxFallSpeed,
+		updateMs:        frameRate,
 		stop:            make(chan bool),
 	}
 }
@@ -63,10 +63,8 @@ func (p *Party) removePartyPlayer(client *Client) {
 // Initialize the game
 func (p *Party) initializeGame() {
 	initializeDefaultMap()
-	blockWidth := 30
-	blockHeight := 30
 	for _, collisionBlockCoords := range defaultMap {
-		p.collisionBlocks = append(p.collisionBlocks, NewCollisionBlock(float64(blockWidth), float64(blockHeight), float64(collisionBlockCoords[0]*blockWidth), float64(collisionBlockCoords[1]*blockHeight)))
+		p.collisionBlocks = append(p.collisionBlocks, NewCollisionBlock(float64(collisionBlockWidth), float64(collisionBlockHeight), float64(collisionBlockCoords[0]*collisionBlockHeight), float64(collisionBlockCoords[1]*collisionBlockHeight)))
 	}
 	payload := NewGameStartPayload(defaultMap)
 	payload.PartyID = p.id
@@ -76,9 +74,9 @@ func (p *Party) initializeGame() {
 		p.players[i].playerId = i
 
 		// Set player position
-		p.players[i].updatePosition(rand.Float64()*1000, 0)
+		p.players[i].updatePosition(rand.Float64()*playerSpawnMaxX, 0)
 
-		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, 100, i, -1) // TODO: remove hard coded nums
+		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, playerHealth, i, -1)
 		payload.PlayersData = append(payload.PlayersData, playerData)
 	}
 
@@ -281,10 +279,10 @@ func (p *Party) fireBullet(playerId int, deltaTime float64) {
 
 	bulletX := p.players[playerId].position.X + p.players[playerId].width + 0.01
 	if velocityDir == -1 {
-		bulletX = p.players[playerId].position.X - 30 - 0.01 // TODO: Remove magic numbers here
+		bulletX = p.players[playerId].position.X - bulletWidth - 0.01
 	}
 
-	bullet := NewBullet(playerId, float64(velocityDir)*1000*deltaTime, 30, 30, bulletX, p.players[playerId].position.Y) // TODO: Remove magic numbers here
+	bullet := NewBullet(playerId, float64(velocityDir)*bulletSpeedX*deltaTime, bulletWidth, bulletHeight, bulletX, p.players[playerId].position.Y)
 	p.bullets = append(p.bullets, bullet)
 
 	p.unsentBullets = append(p.unsentBullets, bullet)

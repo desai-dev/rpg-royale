@@ -22,7 +22,7 @@ func NewBullet(playerId int, velocityX float64, width float64, height float64, x
 func (b *Bullet) updatePosition(x float64, y float64) bool {
 	b.position.X = x
 	b.position.Y = y
-	return !(b.position.X < 0 || b.position.X > 1920) // TODO: Remove magic number
+	return !(b.position.X < 0 || b.position.X > nativeWidth)
 }
 
 //////// ******** Functions for Collider interface implementation ******** ////////

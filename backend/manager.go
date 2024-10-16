@@ -79,7 +79,7 @@ func (m *Manager) createParty(client *Client) {
 		return
 	}
 
-	partyID := GenerateRandomString(10)
+	partyID := GenerateRandomString(partyStringLength)
 	party := NewParty(partyID)
 	party.addPartyPlayer(client)
 	client.party = party
@@ -129,7 +129,7 @@ func (m *Manager) joinParty(c *Client, partyID string) {
 	}
 
 	if party, exists := m.parties[partyID]; exists && party != nil {
-		if party.partySize < 2 {
+		if party.partySize < maxPartySize {
 			party.addPartyPlayer(c)
 			c.party = party
 			party.initializeGame() // start the game once theres two players in a party

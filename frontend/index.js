@@ -1,5 +1,6 @@
 import { CustomEvent } from './event.js';
 import { WebSocketManager } from './manager.js'
+import { settings } from './settings.js'
 
 // Detect if websockets supported
 window.onload = function() {
@@ -11,8 +12,8 @@ window.onload = function() {
 // Resize canvas according to window size
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
-export const nativeWidth = 1920; // Dimensions that the canvas 
-export const nativeHeight = 1080; // will be optimized for
+const nativeWidth = settings.game.nativeWidth;   // Dimensions that the canvas 
+const nativeHeight = settings.game.nativeHeight; // will be optimized for
 
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
@@ -22,9 +23,9 @@ function resizeCanvas() {
   var scaleFitNative = Math.min(deviceWidth / nativeWidth, deviceHeight / nativeHeight);
 
   // Dimensions of the tile map
-  const tileSize = 30; 
-  const mapColumns = 64;
-  const mapRows = 36; 
+  const tileSize = settings.map.tileSize; 
+  const mapColumns = settings.map.mapColumns;
+  const mapRows = settings.map.mapRows; 
   const mapWidth = tileSize * mapColumns;
   const mapHeight = tileSize * mapRows;
 

@@ -2,6 +2,7 @@ import { CustomEvent } from './event.js';
 import { CollisionBlock } from './collisionBlock.js'
 import { Player } from './player.js'
 import { Bullet } from './bullet.js'
+import { settings } from './settings.js'
 
 export class GameManager {
   constructor(wsManager) {
@@ -14,14 +15,14 @@ export class GameManager {
     this.playerInputs = [];
     this.collisionBlocks = [];
     this.bullets = [];
-    this.bulletCooldown = 3; // Cooldown in seconds
+    this.bulletCooldown = settings.bullet.bulletCooldown; // Cooldown in seconds
     this.inputNumber = 0;
     this.curPlayerId = null;
     this.keys = {}; // Tracks keys that are pressed
     this.lastXMovementKeyPressed = ""
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
-    this.sendRate = 15; // How many ms between events sent to the server 
+    this.sendRate = settings.game.frameRate; // How many ms between events sent to the server 
 
     // Event listeners for key presses
     window.addEventListener('keydown', (event) => {
@@ -188,19 +189,18 @@ export class GameManager {
 
     // Fire Bullet
     if (this.bulletCooldown > 0) this.bulletCooldown -= deltaTime
-    console.log(this.bulletCooldown)
     if (this.keys[" "] && this.bulletCooldown <= 0) {
       var velocityDir = (this.lastXMovementKeyPressed == "ArrowRight") ? 1 : -1;
       var bulletX = (this.lastXMovementKeyPressed == "ArrowRight") ? 
         this.players[this.curPlayerId].position.x +  this.players[this.curPlayerId].width + 0.01 :
-        this.players[this.curPlayerId].position.x - 30 - 0.01; // TODO: Remove magic numbers here
-      this.bulletCooldown = 3; 
+        this.players[this.curPlayerId].position.x - settings.bullet.width - 0.01;
+      this.bulletCooldown = settings.bullet.bulletCooldown; 
       bulletFired = true;
       this.bullets.push(new Bullet(
         { x: bulletX,
           y: this.players[this.curPlayerId].position.y
         },
-        velocityDir * 1000 * deltaTime,
+        velocityDir * settings.bullet.speedX * deltaTime,
         this.canvas
       ));
     }
