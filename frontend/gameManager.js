@@ -124,6 +124,7 @@ export class GameManager {
     this.bullets.push(new Bullet(
       { x: payload.position.x, y: payload.position.y },
       payload.velocityX,
+      this.collisionBlocks,
       this.canvas
     ));
   }
@@ -201,6 +202,7 @@ export class GameManager {
           y: this.players[this.curPlayerId].position.y
         },
         velocityDir * settings.bullet.speedX * deltaTime,
+        this.collisionBlocks,
         this.canvas
       ));
     }
@@ -252,7 +254,7 @@ export class GameManager {
     });
 
     // Simultaneously updates bullets and filters them out if they are 
-    // off the screen
+    // off the screen or collided into a platform
     this.bullets = this.bullets.filter(bullet => 
       bullet.update()
     );

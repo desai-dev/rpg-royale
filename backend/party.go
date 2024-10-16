@@ -241,6 +241,8 @@ func (p *Party) checkVerticalCollisions() {
 
 // Checks for horizontal collisions
 func (p *Party) checkHorizontalCollisions() {
+	var remainingBullets []*Bullet
+
 	for _, player := range p.players {
 		// Collision block collisions
 		for _, block := range p.collisionBlocks {
@@ -263,6 +265,22 @@ func (p *Party) checkHorizontalCollisions() {
 			}
 		}
 	}
+
+	// Bullet collisions with platforms
+	for _, bullet := range p.bullets {
+		addBullet := true
+		for _, block := range p.collisionBlocks {
+			if CheckCollision(bullet, block) {
+				addBullet = false
+				break
+			}
+		}
+		if addBullet {
+			remainingBullets = append(remainingBullets, bullet)
+		}
+	}
+
+	p.bullets = remainingBullets
 }
 
 // Fires a bullet from the given clients position
