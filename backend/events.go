@@ -13,6 +13,7 @@ type EventHandler func(event Event, m *Manager, c *Client) error
 // Event names
 const (
 	// Events that are the same for both the server and client
+	EventBulletFired = "BULLET_FIRED"
 
 	// Events that come from client side
 	EventCreateParty = "CREATE_PARTY"
@@ -26,6 +27,16 @@ const (
 )
 
 // ************* PAYLOADS FOR RECIEVING/SENDING DATA FROM/TO CLIENT ************* //
+
+// Payload structure for BULLET_FIRED event
+type BulletFiredPayload struct {
+	PlayerId           int      `json:"playerId"` // When recieving this event from the client,
+	Position           Position `json:"position"` // only the PlayerId and TimeSinceLastEvent are used
+	VelocityX          float64  `json:"velocityX"`
+	Width              float64  `json:"width"`
+	Height             float64  `json:"height"`
+	TimeSinceLastEvent float64  `json:"timeSinceLastEvent"`
+}
 
 // ************* PAYLOADS FOR RECIEVING DATA FROM CLIENT ************* //
 
@@ -48,13 +59,15 @@ type PlayerMovedPayload struct {
 type PlayerData struct {
 	Position    Position `json:"position"`
 	PlayerId    int      `json:"playerId"`
+	Health      float64  `json:"health"`
 	InputNumber int      `json:"inputNumber"`
 }
 
 // Function to create PlayerData type
-func NewPlayerData(x float64, y float64, id int, inputNumber int) PlayerData {
+func NewPlayerData(x float64, y float64, health float64, id int, inputNumber int) PlayerData {
 	return PlayerData{
 		Position:    Position{x, y},
+		Health:      health,
 		PlayerId:    id,
 		InputNumber: inputNumber,
 	}
@@ -88,7 +101,7 @@ func NewPlayersUpdatePayload(players []*Client) PlayersUpdatePayload {
 	data := []PlayerData{}
 
 	for _, player := range players {
-		playerData := NewPlayerData(player.position.X, player.position.Y, player.playerId, player.inputNumber)
+		playerData := NewPlayerData(player.position.X, player.position.Y, player.health, player.playerId, player.inputNumber)
 		data = append(data, playerData)
 	}
 	return PlayersUpdatePayload{

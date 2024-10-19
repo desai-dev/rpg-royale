@@ -1,4 +1,5 @@
 import { checkCollision } from "./collision.js";
+import { settings } from './settings.js'
 
 export class Player {
   constructor(playerId, curPlayerId, position, collisionBlocks, canvas) {
@@ -6,17 +7,17 @@ export class Player {
     this.curPlayerId = curPlayerId;
     this.velocityX = 0;
     this.velocityY = 0;
-    this.jumpPower = -800;
-    this.gravity = 0.5;
-    this.maxFallSpeed = 30;
-    this.speedX = 500;
+    this.jumpPower = settings.player.jumpPower;
+    this.gravity = settings.game.gravityConstant;
+    this.maxFallSpeed = settings.player.maxFallSpeed;
+    this.speedX = settings.player.speedX;
     this.position = position;
-    this.isGrounded = true;
+    this.isGrounded = false;
+    this.health = settings.player.health;
     this.collisionBlocks = collisionBlocks;
     this.canvas = canvas;
-    this.width = 60;
-    this.height = 150;
-
+    this.width = settings.player.width;
+    this.height = settings.player.height;
     const image = new Image();
     image.src = this.playerId === this.curPlayerId ? "../blueTank.png" : "../redTank.png";
     this.image = image;
@@ -77,15 +78,16 @@ export class Player {
     this.checkVerticalCollisions()
 
     // Draw player
-    this.image.height = 150
-    this.image.width = 150
-    this.canvas.beginPath();
-    this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
-    this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
-    this.canvas.fill();
-    this.canvas.closePath();
-    this.canvas.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
-
+    if (this.health > 0) {
+      this.image.height = 150
+      this.image.width = 150
+      this.canvas.beginPath();
+      this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
+      this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
+      this.canvas.fill();
+      this.canvas.closePath();
+      this.canvas.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+    }
   }
 
   update() {
