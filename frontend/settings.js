@@ -9,6 +9,13 @@ export const settings = {
     maxFallSpeed: 30,
   },
 
+  // Healthbar Settings
+  healthBar: {
+    width: 60,
+    height: 10,
+    pixelsAbovePlayer: 5,
+  },
+
   // Collision Block Settings
   collisionBlock: {
     width: 30,

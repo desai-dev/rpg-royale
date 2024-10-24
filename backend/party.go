@@ -152,7 +152,7 @@ func (p *Party) updatesClients() {
 		player.egress <- updatePosition
 	}
 
-	// Send bullet updates to clients
+	// Send bullet updates to clients TODO: Make this its own function
 	p.mutex.Lock()
 
 	if len(p.unsentBullets) > 0 {
@@ -261,9 +261,13 @@ func (p *Party) checkHorizontalCollisions() {
 		// Bullet collisions
 		for _, bullet := range p.bullets {
 			if CheckCollision(player, bullet) {
-				player.health = 0 // Adjust bullet damage here
+				player.health -= rand.Float64() * 100
+			} else {
+				remainingBullets = append(remainingBullets, bullet)
 			}
 		}
+		p.bullets = remainingBullets
+		remainingBullets = remainingBullets[:0]
 	}
 
 	// Bullet collisions with platforms

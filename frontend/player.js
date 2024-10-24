@@ -14,12 +14,13 @@ export class Player {
     this.position = position;
     this.isGrounded = false;
     this.health = settings.player.health;
+    this.maxHealth = settings.player.health;
     this.collisionBlocks = collisionBlocks;
     this.canvas = canvas;
     this.width = settings.player.width;
     this.height = settings.player.height;
     const image = new Image();
-    image.src = this.playerId === this.curPlayerId ? "../blueTank.png" : "../redTank.png";
+    image.src = this.playerId === this.curPlayerId ? "./assets/blueTank.png" : "./assets/redTank.png";
     this.image = image;
   }
 
@@ -62,7 +63,28 @@ export class Player {
     });
   }
 
-  
+  drawHealthBar() {
+    const healthBarWidth = settings.healthBar.width;
+    const healthBarHeight = settings.healthBar.height;
+    const healthPercentage = this.health / this.maxHealth;
+    if (this.playerId === this.curPlayerId) 
+      console.log(healthPercentage);
+
+    // Calculate the width of the health bar based on current health
+    const currentHealthBarWidth = healthBarWidth * healthPercentage;
+
+    // Position the health bar above the player's head
+    const healthBarX = this.position.x;
+    const healthBarY = this.position.y - healthBarHeight - settings.healthBar.pixelsAbovePlayer; 
+
+    // Draw the health bar background 
+    this.canvas.fillStyle = "#D3D3D3";
+    this.canvas.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+    // Draw the actual health bar
+    this.canvas.fillStyle = "#FF69B4";
+    this.canvas.fillRect(healthBarX, healthBarY, currentHealthBarWidth, healthBarHeight);
+  }
 
   draw() {
     // Update position
@@ -87,6 +109,7 @@ export class Player {
       this.canvas.fill();
       this.canvas.closePath();
       this.canvas.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+      this.drawHealthBar();
     }
   }
 
