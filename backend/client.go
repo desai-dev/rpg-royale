@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand/v2"
 
 	"github.com/gorilla/websocket"
 )
@@ -41,7 +42,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		manager:       manager,
 		party:         nil,
 		inParty:       false,
-		position:      Position{X: 0, Y: 0}, // This value is properly set when a game starts
+		position:      Position{X: 0, Y: 0},
 		speedX:        playerSpeedX,
 		velocityX:     0,
 		velocityY:     0,
@@ -52,7 +53,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		height:        playerHeight,
 		width:         playerWidth,
 		egress:        make(chan *Event),
-		playerId:      0, // This value is properly set when a game starts
+		playerId:      0,
 		inputNumber:   0,
 	}
 }
@@ -61,6 +62,16 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 func (c *Client) updatePosition(x float64, y float64) {
 	c.position.X = x
 	c.position.Y = y
+}
+
+// Respawns a player
+func (c *Client) respawnPlayer() {
+	c.updatePosition(rand.Float64()*playerSpawnMaxX, 0)
+	c.health = playerHealth
+	c.isGrounded = false
+	c.velocityX = 0
+	c.velocityY = 0
+	c.lastXMovement = ""
 }
 
 // Read messages from a client

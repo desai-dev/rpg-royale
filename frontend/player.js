@@ -67,8 +67,6 @@ export class Player {
     const healthBarWidth = settings.healthBar.width;
     const healthBarHeight = settings.healthBar.height;
     const healthPercentage = this.health / this.maxHealth;
-    if (this.playerId === this.curPlayerId) 
-      console.log(healthPercentage);
 
     // Calculate the width of the health bar based on current health
     const currentHealthBarWidth = healthBarWidth * healthPercentage;

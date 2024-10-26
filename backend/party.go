@@ -110,7 +110,7 @@ func (p *Party) startGameTicker() {
 	for {
 		select {
 		case <-ticker.C:
-			p.updatesClients() // Send updates to all clients
+			p.updateClients() // Send updates to all clients
 		case <-p.stop:
 			fmt.Printf("Stopping ticker for party with id: %s", p.id)
 			return
@@ -119,7 +119,7 @@ func (p *Party) startGameTicker() {
 }
 
 // Function to send updates to all clients in the party
-func (p *Party) updatesClients() {
+func (p *Party) updateClients() {
 	// Update client positions
 	p.updateClientPositions()
 
@@ -136,57 +136,10 @@ func (p *Party) updatesClients() {
 	p.checkVerticalCollisions()
 
 	// Send player positions to client
-	payload := NewPlayersUpdatePayload(p.players)
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println("Error marshaling payload:", err)
-		return
-	}
-
-	updatePosition := &Event{
-		Type:    EventUpdatePlayers,
-		Payload: payloadBytes,
-	}
-
-	for _, player := range p.players {
-		player.egress <- updatePosition
-	}
+	p.sendPlayerData()
 
 	// Send bullet updates to clients TODO: Make this its own function
-	p.mutex.Lock()
-
-	if len(p.unsentBullets) > 0 {
-		for _, bullet := range p.unsentBullets { // TODO: Instead of sending an event for each bullet,
-			bulletUpdate := BulletFiredPayload{ // send an array of bullets once
-				PlayerId:  bullet.playerId,
-				Position:  Position{X: bullet.position.X, Y: bullet.position.Y},
-				VelocityX: bullet.velocityX,
-				Width:     bullet.width,
-				Height:    bullet.height,
-			}
-
-			payloadBytes, err := json.Marshal(bulletUpdate)
-			if err != nil {
-				fmt.Println("Error marshaling bullet update:", err)
-				return
-			}
-
-			bulletFiredEvent := &Event{
-				Type:    EventBulletFired,
-				Payload: payloadBytes,
-			}
-
-			// Send to players who did not fire the bullet
-			for _, player := range p.players {
-				if player.playerId != bullet.playerId {
-					player.egress <- bulletFiredEvent
-				}
-			}
-		}
-		p.unsentBullets = []*Bullet{}
-	}
-
-	p.mutex.Unlock()
+	p.sendBulletData()
 }
 
 // Updates clients positions based on velocity
@@ -220,31 +173,12 @@ func (p *Party) applyGravity() {
 	}
 }
 
-// Checks for vertical collisions
-func (p *Party) checkVerticalCollisions() {
-	for _, player := range p.players {
-		for _, block := range p.collisionBlocks {
-			if CheckCollision(player, block) {
-				if player.velocityY > 0 {
-					player.velocityY = 0
-					player.updatePosition(player.position.X, block.position.Y-player.height-0.01)
-					player.isGrounded = true
-				}
-				if player.velocityY < 0 {
-					player.velocityY = 0
-					player.updatePosition(player.position.X, block.position.Y+block.height+0.01)
-				}
-			}
-		}
-	}
-}
-
 // Checks for horizontal collisions
 func (p *Party) checkHorizontalCollisions() {
 	var remainingBullets []*Bullet
 
 	for _, player := range p.players {
-		// Collision block collisions
+		// Collision block collisions with player
 		for _, block := range p.collisionBlocks {
 			if CheckCollision(player, block) {
 				if player.velocityX > 0 {
@@ -258,10 +192,13 @@ func (p *Party) checkHorizontalCollisions() {
 			}
 		}
 
-		// Bullet collisions
+		// Bullet collisions with player
 		for _, bullet := range p.bullets {
 			if CheckCollision(player, bullet) {
 				player.health -= rand.Float64() * 100
+				if player.health <= 0 {
+					player.respawnPlayer()
+				}
 			} else {
 				remainingBullets = append(remainingBullets, bullet)
 			}
@@ -287,6 +224,80 @@ func (p *Party) checkHorizontalCollisions() {
 	p.bullets = remainingBullets
 }
 
+// Checks for vertical collisions
+func (p *Party) checkVerticalCollisions() {
+	for _, player := range p.players {
+		for _, block := range p.collisionBlocks {
+			if CheckCollision(player, block) {
+				if player.velocityY > 0 {
+					player.velocityY = 0
+					player.updatePosition(player.position.X, block.position.Y-player.height-0.01)
+					player.isGrounded = true
+				}
+				if player.velocityY < 0 {
+					player.velocityY = 0
+					player.updatePosition(player.position.X, block.position.Y+block.height+0.01)
+				}
+			}
+		}
+	}
+}
+
+func (p *Party) sendPlayerData() {
+	payload := NewPlayersUpdatePayload(p.players)
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println("Error marshaling payload:", err)
+		return
+	}
+
+	updatePosition := &Event{
+		Type:    EventUpdatePlayers,
+		Payload: payloadBytes,
+	}
+
+	for _, player := range p.players {
+		player.egress <- updatePosition
+	}
+}
+
+func (p *Party) sendBulletData() {
+	p.mutex.Lock()
+
+	if len(p.unsentBullets) > 0 {
+		for _, bullet := range p.unsentBullets {
+			bulletUpdate := BulletFiredPayload{
+				PlayerId:  bullet.playerId,
+				Position:  Position{X: bullet.position.X, Y: bullet.position.Y},
+				VelocityX: bullet.velocityX,
+				Width:     bullet.width,
+				Height:    bullet.height,
+			}
+
+			payloadBytes, err := json.Marshal(bulletUpdate)
+			if err != nil {
+				fmt.Println("Error marshaling bullet update:", err)
+				return
+			}
+
+			bulletFiredEvent := &Event{
+				Type:    EventBulletFired,
+				Payload: payloadBytes,
+			}
+
+			// Send to players who did not fire the bullet
+			for _, player := range p.players {
+				if player.playerId != bullet.playerId {
+					player.egress <- bulletFiredEvent
+				}
+			}
+		}
+		p.unsentBullets = []*Bullet{}
+	}
+
+	p.mutex.Unlock()
+}
+
 // Fires a bullet from the given clients position
 func (p *Party) fireBullet(playerId int, deltaTime float64) {
 	// Lock mutex because we are modifying p.unsentBullets which might
@@ -295,7 +306,7 @@ func (p *Party) fireBullet(playerId int, deltaTime float64) {
 	defer p.mutex.Unlock()
 
 	velocityDir := -1
-	if p.players[playerId].lastXMovement == "ArrowRight" {
+	if p.players[playerId].lastXMovement == "ArrowRight" { // TODO: remove hardcoded stuff
 		velocityDir = 1
 	}
 
