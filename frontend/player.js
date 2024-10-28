@@ -1,5 +1,6 @@
+import { Gun } from "./gun.js"
 import { checkCollision } from "./collision.js";
-import { settings } from './settings.js'
+import { settings } from "./settings.js";
 
 export class Player {
   constructor(playerId, curPlayerId, position, collisionBlocks, canvas) {
@@ -19,6 +20,21 @@ export class Player {
     this.canvas = canvas;
     this.width = settings.player.width;
     this.height = settings.player.height;
+    this.guns = [
+      new Gun(settings.guns.sniper.cooldown, 
+              settings.bullets.sniperBullet.speedX, 
+              settings.bullets.sniperBullet.bulletDamage,
+              settings.bullets.sniperBullet.width,
+              settings.bullets.sniperBullet.height),
+      new Gun(settings.guns.wallBreaker.cooldown, 
+              settings.bullets.wallBreakerBullet.speedX, 
+              settings.bullets.wallBreakerBullet.bulletDamage,
+              settings.bullets.wallBreakerBullet.width,
+              settings.bullets.wallBreakerBullet.height,
+            )
+    ];
+    this.curGunIndex = 0;
+    this.curGun = this.guns[this.curGunIndex]
     const image = new Image();
     image.src = this.playerId === this.curPlayerId ? "./assets/blueTank.png" : "./assets/redTank.png";
     this.image = image;
@@ -82,6 +98,11 @@ export class Player {
     // Draw the actual health bar
     this.canvas.fillStyle = "#FF69B4";
     this.canvas.fillRect(healthBarX, healthBarY, currentHealthBarWidth, healthBarHeight);
+  }
+
+  switchGun() {
+    this.curGunIndex = (this.curGunIndex + 1) % this.guns.length
+    this.curGun = this.guns[this.curGunIndex]
   }
 
   draw() {

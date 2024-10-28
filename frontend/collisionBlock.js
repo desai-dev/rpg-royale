@@ -11,7 +11,7 @@ export class CollisionBlock {
   }
 
   draw() {
-    this.canvas.fillStyle = 'rgba(255, 0, 0, 0.5)'
+    this.canvas.fillStyle = 'rgba(0, 125, 15, 1)'
     this.canvas.fillRect(this.position.x, this.position.y, this.width, this.height)
   }
 

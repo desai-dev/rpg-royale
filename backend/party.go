@@ -195,7 +195,7 @@ func (p *Party) checkHorizontalCollisions() {
 		// Bullet collisions with player
 		for _, bullet := range p.bullets {
 			if CheckCollision(player, bullet) {
-				player.health -= rand.Float64() * 100
+				player.health -= bullet.damage
 				if player.health <= 0 {
 					player.respawnPlayer()
 				}
@@ -305,17 +305,9 @@ func (p *Party) fireBullet(playerId int, deltaTime float64) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	velocityDir := -1
-	if p.players[playerId].lastXMovement == "ArrowRight" { // TODO: remove hardcoded stuff
-		velocityDir = 1
-	}
+	playerGun := p.players[playerId].guns[p.players[playerId].curGunIdx]
+	bullet := playerGun.shootBullet(p.players[playerId], deltaTime)
 
-	bulletX := p.players[playerId].position.X + p.players[playerId].width + 0.01
-	if velocityDir == -1 {
-		bulletX = p.players[playerId].position.X - bulletWidth - 0.01
-	}
-
-	bullet := NewBullet(playerId, float64(velocityDir)*bulletSpeedX*deltaTime, bulletWidth, bulletHeight, bulletX, p.players[playerId].position.Y)
 	p.bullets = append(p.bullets, bullet)
 
 	p.unsentBullets = append(p.unsentBullets, bullet)

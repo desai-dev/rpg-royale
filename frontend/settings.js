@@ -23,11 +23,31 @@ export const settings = {
   },
 
   // Bullet Settings
-  bullet: {
-    width: 30,
-    height: 30,
-    speedX: 1000,
-    bulletCooldown: 3, // In seconds
+  bullets: {
+    sniperBullet: {
+      width: 60,
+      height: 30,
+      speedX: 1000,
+      bulletCooldown: 3, // In seconds
+      bulletDamage: 20,
+    },
+    wallBreakerBullet: {
+      width: 30,
+      height: 30,
+      speedX: 3000,
+      bulletCooldown: 1, // In seconds
+      bulletDamage: 100,
+    }
+  },
+
+  // Gun settings
+  guns : {
+    sniper: {
+      cooldown: 3
+    },
+    wallBreaker: {
+      cooldown: 0.5
+    }
   },
 
   // Map settings

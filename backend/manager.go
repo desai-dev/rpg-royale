@@ -175,6 +175,8 @@ func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 		} else if key == "ArrowUp" && client.isGrounded {
 			client.isGrounded = false
 			client.velocityY = client.jumpPower * payload.TimeSinceLastEvent
+		} else if key == "r" {
+			client.switchGun()
 		}
 	}
 }

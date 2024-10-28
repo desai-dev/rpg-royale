@@ -35,6 +35,7 @@ type BulletFiredPayload struct {
 	VelocityX          float64  `json:"velocityX"`
 	Width              float64  `json:"width"`
 	Height             float64  `json:"height"`
+	Damage             float64  `json:"damage"`
 	TimeSinceLastEvent float64  `json:"timeSinceLastEvent"`
 }
 

@@ -2,12 +2,12 @@ import { checkCollision } from "./collision.js"
 import { settings } from "./settings.js";
 
 export class Bullet {
-  constructor(position, velocityX, collisionBlocks, canvas) {
+  constructor(position, velocityX, width, height, collisionBlocks, canvas) {
     this.velocityX = velocityX;
     this.position = position;
     this.canvas = canvas;
-    this.width = settings.bullet.width;
-    this.height = settings.bullet.height;
+    this.width = width;
+    this.height = height;
     this.collisionBlocks = collisionBlocks;
   }
 

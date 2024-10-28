@@ -15,11 +15,11 @@ export class GameManager {
     this.playerInputs = [];
     this.collisionBlocks = [];
     this.bullets = [];
-    this.bulletCooldown = settings.bullet.bulletCooldown; // Cooldown in seconds
     this.inputNumber = 0;
     this.curPlayerId = null;
     this.keys = {}; // Tracks keys that are pressed
     this.lastXMovementKeyPressed = ""
+    this.gunSwitched = false
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
     this.sendRate = settings.game.frameRate; // How many ms between events sent to the server 
@@ -29,6 +29,8 @@ export class GameManager {
       this.keys[event.key] = true;
       if (event.key == "ArrowRight" || event.key == "ArrowLeft") {
         this.lastXMovementKeyPressed = event.key
+      } else if (event.key == 'r') {
+        this.gunSwitched = true
       }
     });
 
@@ -124,6 +126,8 @@ export class GameManager {
     this.bullets.push(new Bullet(
       { x: payload.position.x, y: payload.position.y },
       payload.velocityX,
+      payload.width,
+      payload.height,
       this.collisionBlocks,
       this.canvas
     ));
@@ -189,22 +193,17 @@ export class GameManager {
     }
 
     // Fire Bullet
-    if (this.bulletCooldown > 0) this.bulletCooldown -= deltaTime
-    if (this.keys[" "] && this.bulletCooldown <= 0) {
-      var velocityDir = (this.lastXMovementKeyPressed == "ArrowRight") ? 1 : -1;
-      var bulletX = (this.lastXMovementKeyPressed == "ArrowRight") ? 
-        this.players[this.curPlayerId].position.x +  this.players[this.curPlayerId].width + 0.01 :
-        this.players[this.curPlayerId].position.x - settings.bullet.width - 0.01;
-      this.bulletCooldown = settings.bullet.bulletCooldown; 
+    if (this.gunSwitched) {
+      this.gunSwitched = false
+      this.players[this.curPlayerId].switchGun()
+      pressedKeys.push("r")
+    }
+    var curGun = this.players[this.curPlayerId].curGun
+    curGun.updateCooldown(deltaTime)
+    if (this.keys[" "] && curGun.canShoot()) {
+      var bullet = curGun.shoot(this.players[this.curPlayerId], this.lastXMovementKeyPressed, this.collisionBlocks, this.canvas, deltaTime);
+      this.bullets.push(bullet)
       bulletFired = true;
-      this.bullets.push(new Bullet(
-        { x: bulletX,
-          y: this.players[this.curPlayerId].position.y
-        },
-        velocityDir * settings.bullet.speedX * deltaTime,
-        this.collisionBlocks,
-        this.canvas
-      ));
     }
 
     // Send events to server every "sendRate" ms

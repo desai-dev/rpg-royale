@@ -6,6 +6,7 @@ type Bullet struct {
 	position  Position
 	width     float64
 	height    float64
+	damage    float64
 }
 
 // Initializes a new bullet
@@ -16,6 +17,30 @@ func NewBullet(playerId int, velocityX float64, width float64, height float64, x
 		position:  Position{X: x, Y: y},
 		width:     width,
 		height:    height,
+	}
+}
+
+// Returns a sniper bullet
+func NewSniperBullet(playerId int, dir int, x float64, y float64, deltaTime float64) *Bullet {
+	return &Bullet{
+		playerId:  playerId,
+		velocityX: sniperBulletSpeedX * float64(dir) * deltaTime,
+		position:  Position{X: x, Y: y},
+		width:     sniperBulletWidth,
+		height:    sniperBulletHeight,
+		damage:    sniperBulletDamage,
+	}
+}
+
+// Returns a wallbreaker bullet
+func NewWallbreakerBullet(playerId int, dir int, x float64, y float64, deltaTime float64) *Bullet {
+	return &Bullet{
+		playerId:  playerId,
+		velocityX: wallbreakerBulletSpeedX * float64(dir) * deltaTime,
+		position:  Position{X: x, Y: y},
+		width:     wallbreakerBulletWidth,
+		height:    wallbreakerBulletHeight,
+		damage:    wallbreakerBulletDamage,
 	}
 }
 

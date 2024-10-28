@@ -20,9 +20,18 @@ const (
 	collisionBlockHeight = 30
 
 	// Bullet Settings
-	bulletWidth  = 30
-	bulletHeight = 30
-	bulletSpeedX = 1000
+	sniperBulletWidth       = 60
+	sniperBulletHeight      = 30
+	sniperBulletSpeedX      = 1000
+	sniperBulletDamage      = 20
+	wallbreakerBulletWidth  = 30
+	wallbreakerBulletHeight = 30
+	wallbreakerBulletSpeedX = 3000
+	wallbreakerBulletDamage = 100
+
+	// Gun settings
+	sniperCooldown      = 3
+	wallbreakerCooldown = 0.5
 
 	// General game settings
 	nativeWidth     = 1920

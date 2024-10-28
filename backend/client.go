@@ -17,6 +17,8 @@ type Client struct {
 	connection    *websocket.Conn
 	manager       *Manager
 	party         *Party
+	guns          []*Gun
+	curGunIdx     int
 	inParty       bool
 	playerId      int
 	position      Position
@@ -37,10 +39,15 @@ type Client struct {
 
 // Initializes a new client
 func NewClient(conn *websocket.Conn, manager *Manager) *Client {
+	sniper := NewGun("Sniper")
+	wallbreaker := NewGun("Wallbreaker")
+
 	return &Client{
 		connection:    conn,
 		manager:       manager,
 		party:         nil,
+		guns:          []*Gun{sniper, wallbreaker},
+		curGunIdx:     0,
 		inParty:       false,
 		position:      Position{X: 0, Y: 0},
 		speedX:        playerSpeedX,
@@ -72,6 +79,11 @@ func (c *Client) respawnPlayer() {
 	c.velocityX = 0
 	c.velocityY = 0
 	c.lastXMovement = ""
+}
+
+// Switches the clients gun to the next gun in the gun array
+func (c *Client) switchGun() {
+	c.curGunIdx = (c.curGunIdx + 1) % len(c.guns)
 }
 
 // Read messages from a client
