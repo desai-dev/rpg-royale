@@ -1,13 +1,14 @@
 import { Bullet } from './bullet.js'
 
 export class Gun {
-  constructor(reloadTime, bulletSpeedX, bulletDamage, bulletWidth, bulletHeight) {
+  constructor(reloadTime, rotationAmount, bulletSpeedX, bulletDamage, bulletWidth, bulletHeight) {
     this.reloadTime = reloadTime;
     this.cooldown = 0;
-    this.bulletSpeedX = bulletSpeedX
-    this.bulletDamage = bulletDamage
-    this.bulletWidth = bulletWidth
-    this.bulletHeight = bulletHeight
+    this.rotationAmount = rotationAmount;
+    this.bulletSpeedX = bulletSpeedX;
+    this.bulletDamage = bulletDamage;
+    this.bulletWidth = bulletWidth;
+    this.bulletHeight = bulletHeight;
   }
 
   canShoot() {

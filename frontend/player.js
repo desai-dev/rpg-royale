@@ -22,11 +22,13 @@ export class Player {
     this.height = settings.player.height;
     this.guns = [
       new Gun(settings.guns.sniper.cooldown, 
+              settings.guns.sniper.rotationAmount,
               settings.bullets.sniperBullet.speedX, 
               settings.bullets.sniperBullet.bulletDamage,
               settings.bullets.sniperBullet.width,
               settings.bullets.sniperBullet.height),
       new Gun(settings.guns.wallBreaker.cooldown, 
+              settings.guns.wallBreaker.rotationAmount,
               settings.bullets.wallBreakerBullet.speedX, 
               settings.bullets.wallBreakerBullet.bulletDamage,
               settings.bullets.wallBreakerBullet.width,
@@ -34,7 +36,8 @@ export class Player {
             )
     ];
     this.curGunIndex = 0;
-    this.curGun = this.guns[this.curGunIndex]
+    this.curGun = this.guns[this.curGunIndex];
+    this.gunAngle = 0;
     const image = new Image();
     image.src = this.playerId === this.curPlayerId ? "./assets/blueTank.png" : "./assets/redTank.png";
     this.image = image;
@@ -105,6 +108,20 @@ export class Player {
     this.curGun = this.guns[this.curGunIndex]
   }
 
+  rotateGun(upKey, downKey, lastRotateKey) {
+    if (upKey && downKey) {
+      if (lastRotateKey == 'w') {
+        this.gunAngle -= this.curGun.rotationAmount
+      } else if (lastRotateKey == 's') {
+        this.gunAngle += this.curGun.rotationAmount
+      }
+    } else if (upKey) {
+      this.gunAngle -= this.curGun.rotationAmount
+    } else if (downKey) {
+      this.gunAngle += this.curGun.rotationAmount
+    }
+  }
+
   draw() {
     // Update position
     this.position.x += this.velocityX
@@ -118,17 +135,41 @@ export class Player {
     // Check vertical collision
     this.checkVerticalCollisions()
 
-    // Draw player
     if (this.health > 0) {
-      this.image.height = 150
-      this.image.width = 150
+      // Draw player
       this.canvas.beginPath();
       this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
       this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
       this.canvas.fill();
       this.canvas.closePath();
-      this.canvas.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+
+      // Draw healthbar
       this.drawHealthBar();
+
+      // Save canvas state
+      this.canvas.save();
+
+      // Translate context to player's position + gun's offset
+      const gunX = this.position.x + this.width / 2;
+      const gunY = this.position.y + this.height / 2;
+      this.canvas.translate(gunX, gunY);
+  
+      // Apply gun rotation
+      this.canvas.rotate(this.gunAngle * Math.PI / 180);
+  
+      // Draw gun image centered at the translated origin
+      this.image.height = 150;
+      this.image.width = 150;
+      this.canvas.drawImage(
+        this.image,
+        -this.image.width / 2,
+        -this.image.height / 2,
+        this.image.width,
+        this.image.height
+      );
+  
+      // Restore canvas rotation for other drawings
+      this.canvas.restore();
     }
   }
 

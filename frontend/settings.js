@@ -43,10 +43,12 @@ export const settings = {
   // Gun settings
   guns : {
     sniper: {
-      cooldown: 3
+      cooldown: 3,
+      rotationAmount: 3,
     },
     wallBreaker: {
-      cooldown: 0.5
+      cooldown: 0.5,
+      rotationAmount: 5
     }
   },
 

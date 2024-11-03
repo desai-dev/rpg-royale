@@ -19,6 +19,7 @@ export class GameManager {
     this.curPlayerId = null;
     this.keys = {}; // Tracks keys that are pressed
     this.lastXMovementKeyPressed = ""
+    this.lastRotationKeyPressed = ""
     this.gunSwitched = false
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
@@ -31,6 +32,8 @@ export class GameManager {
         this.lastXMovementKeyPressed = event.key
       } else if (event.key == 'r') {
         this.gunSwitched = true
+      } else if (event.key == 'w' || event.key == "s") {
+        this.lastRotationKeyPressed = event.key
       }
     });
 
@@ -40,6 +43,10 @@ export class GameManager {
         this.lastXMovementKeyPressed = "ArrowLeft";
       } else if (event.key === "ArrowLeft" && this.keys["ArrowRight"]) {
         this.lastXMovementKeyPressed = "ArrowRight";
+      } else if (event.key === "w" && this.keys["w"]) {
+        this.lastRotationKeyPressed = "w"
+      } else if (event.key === "s" && this.keys["s"]) {
+        this.lastRotationKeyPressed = "s"
       }
     });
   }
@@ -190,6 +197,11 @@ export class GameManager {
       pressedKeys.push("ArrowUp");
       this.players[this.curPlayerId].velocityY = this.players[this.curPlayerId].jumpPower * deltaTime;
       dy = this.players[this.curPlayerId].velocityY
+    }
+
+    // Rotate gun
+    if (this.keys['w'] || this.keys['s']) {
+      this.players[this.curPlayerId].rotateGun(this.keys['w'], this.keys['s'], this.lastRotationKeyPressed)
     }
 
     // Fire Bullet
