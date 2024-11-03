@@ -1,5 +1,9 @@
 package main
 
+import (
+	"math"
+)
+
 type Gun struct {
 	bulletType     string
 	reloadTime     float64
@@ -23,22 +27,17 @@ func NewGun(bulletType string) *Gun {
 }
 
 func (g *Gun) shootBullet(player *Client, deltaTime float64) *Bullet {
-	velocityDir := -1
-	if player.lastXMovement == "ArrowRight" { // TODO: remove hardcoded stuff
-		velocityDir = 1
-	}
-
-	bulletX := player.position.X + player.width + 0.01
+	radians := player.gunRotation * (math.Pi / 180)
+	velocityX := math.Cos(radians)
+	velocityY := math.Sin(radians)
 
 	if g.bulletType == "Sniper" {
-		if velocityDir == -1 {
-			bulletX = player.position.X - sniperBulletWidth - 0.01
-		}
-		return NewSniperBullet(player.playerId, velocityDir, bulletX, player.position.Y, deltaTime)
+		bulletX := player.position.X + sniperWidth*math.Cos(radians)
+		bulletY := player.position.Y + sniperWidth*math.Sin(radians)
+		return NewSniperBullet(player.playerId, velocityX, velocityY, bulletX, bulletY, deltaTime)
 	} else {
-		if velocityDir == -1 {
-			bulletX = player.position.X - wallbreakerBulletWidth - 0.01
-		}
-		return NewWallbreakerBullet(player.playerId, velocityDir, bulletX, player.position.Y, deltaTime)
+		bulletX := player.position.X + wallbreakerWidth*math.Cos(radians)
+		bulletY := player.position.Y + wallbreakerWidth*math.Sin(radians)
+		return NewWallbreakerBullet(player.playerId, velocityX, velocityY, bulletX, bulletY, deltaTime)
 	}
 }

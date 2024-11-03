@@ -138,6 +138,7 @@ export class GameManager {
     this.bullets.push(new Bullet(
       { x: payload.position.x, y: payload.position.y },
       payload.velocityX,
+      payload.velocityY,
       payload.width,
       payload.height,
       this.collisionBlocks,
@@ -209,12 +210,14 @@ export class GameManager {
       this.players[this.curPlayerId].rotateGun(this.keys['w'], this.keys['s'], this.lastRotationKeyPressed)
     }
 
-    // Fire Bullet
+    // Switch guns
     if (this.gunSwitched) {
       this.gunSwitched = false
       this.players[this.curPlayerId].switchGun()
       pressedKeys.push("r")
     }
+
+    // Fire bullets
     var curGun = this.players[this.curPlayerId].curGun
     curGun.updateCooldown(deltaTime)
     if (this.keys[" "] && curGun.canShoot()) {

@@ -207,9 +207,9 @@ func GunRotated(event Event, m *Manager, c *Client) error {
 }
 
 func (m *Manager) gunRotated(client *Client, payload GunRotationPayload) {
-	if payload.KeyPressed == "w" {
+	if payload.KeyPressed == "w" && client.gunRotation > minGunAngle {
 		client.updateGunRotation(-client.guns[client.curGunIdx].rotationAmount)
-	} else if payload.KeyPressed == "s" {
+	} else if payload.KeyPressed == "s" && client.gunRotation < maxGunAngle {
 		client.updateGunRotation(client.guns[client.curGunIdx].rotationAmount)
 	}
 }

@@ -154,7 +154,7 @@ func (p *Party) updateBulletPositions() {
 	var remainingBullets []*Bullet
 
 	for _, bullet := range p.bullets {
-		if bullet.updatePosition(bullet.position.X+bullet.velocityX, bullet.position.Y) {
+		if bullet.updatePosition(bullet.position.X+bullet.velocityX, bullet.position.Y+bullet.velocityY) {
 			remainingBullets = append(remainingBullets, bullet)
 		}
 	}
@@ -270,6 +270,7 @@ func (p *Party) sendBulletData() {
 				PlayerId:  bullet.playerId,
 				Position:  Position{X: bullet.position.X, Y: bullet.position.Y},
 				VelocityX: bullet.velocityX,
+				VelocityY: bullet.velocityY,
 				Width:     bullet.width,
 				Height:    bullet.height,
 			}

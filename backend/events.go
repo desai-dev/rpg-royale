@@ -34,6 +34,7 @@ type BulletFiredPayload struct {
 	PlayerId           int      `json:"playerId"` // When recieving this event from the client,
 	Position           Position `json:"position"` // only the PlayerId and TimeSinceLastEvent are used
 	VelocityX          float64  `json:"velocityX"`
+	VelocityY          float64  `json:"velocityY"`
 	Width              float64  `json:"width"`
 	Height             float64  `json:"height"`
 	Damage             float64  `json:"damage"`

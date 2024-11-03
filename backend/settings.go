@@ -34,6 +34,12 @@ const (
 	wallbreakerCooldown       = 0.5
 	sniperRotationAmount      = 3
 	wallbreakerRotationAmount = 5
+	sniperHeight              = 150
+	sniperWidth               = 150
+	wallbreakerHeight         = 150
+	wallbreakerWidth          = 150
+	maxGunAngle               = 45
+	minGunAngle               = -45
 
 	// General game settings
 	nativeWidth     = 1920

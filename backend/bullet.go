@@ -3,6 +3,7 @@ package main
 type Bullet struct {
 	playerId  int
 	velocityX float64
+	velocityY float64
 	position  Position
 	width     float64
 	height    float64
@@ -10,10 +11,11 @@ type Bullet struct {
 }
 
 // Initializes a new bullet
-func NewBullet(playerId int, velocityX float64, width float64, height float64, x float64, y float64) *Bullet {
+func NewBullet(playerId int, velocityX float64, velocityY float64, width float64, height float64, x float64, y float64) *Bullet {
 	return &Bullet{
 		playerId:  playerId,
 		velocityX: velocityX,
+		velocityY: velocityY,
 		position:  Position{X: x, Y: y},
 		width:     width,
 		height:    height,
@@ -21,10 +23,11 @@ func NewBullet(playerId int, velocityX float64, width float64, height float64, x
 }
 
 // Returns a sniper bullet
-func NewSniperBullet(playerId int, dir int, x float64, y float64, deltaTime float64) *Bullet {
+func NewSniperBullet(playerId int, velocityX float64, velocityY float64, x float64, y float64, deltaTime float64) *Bullet {
 	return &Bullet{
 		playerId:  playerId,
-		velocityX: sniperBulletSpeedX * float64(dir) * deltaTime,
+		velocityX: sniperBulletSpeedX * velocityX * deltaTime,
+		velocityY: sniperBulletSpeedX * velocityY * deltaTime,
 		position:  Position{X: x, Y: y},
 		width:     sniperBulletWidth,
 		height:    sniperBulletHeight,
@@ -33,10 +36,11 @@ func NewSniperBullet(playerId int, dir int, x float64, y float64, deltaTime floa
 }
 
 // Returns a wallbreaker bullet
-func NewWallbreakerBullet(playerId int, dir int, x float64, y float64, deltaTime float64) *Bullet {
+func NewWallbreakerBullet(playerId int, velocityX float64, velocityY float64, x float64, y float64, deltaTime float64) *Bullet {
 	return &Bullet{
 		playerId:  playerId,
-		velocityX: wallbreakerBulletSpeedX * float64(dir) * deltaTime,
+		velocityX: wallbreakerBulletSpeedX * velocityX * deltaTime,
+		velocityY: wallbreakerBulletSpeedX * velocityY * deltaTime,
 		position:  Position{X: x, Y: y},
 		width:     wallbreakerBulletWidth,
 		height:    wallbreakerBulletHeight,

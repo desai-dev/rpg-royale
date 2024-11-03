@@ -2,8 +2,9 @@ import { checkCollision } from "./collision.js"
 import { settings } from "./settings.js";
 
 export class Bullet {
-  constructor(position, velocityX, width, height, collisionBlocks, canvas) {
+  constructor(position, velocityX, velocityY, width, height, collisionBlocks, canvas) {
     this.velocityX = velocityX;
+    this.velocityY = velocityY;
     this.position = position;
     this.canvas = canvas;
     this.width = width;
@@ -14,6 +15,7 @@ export class Bullet {
   // Draws a bullet and returns whether or not that bullet is off the screen
   draw() {
     this.position.x += this.velocityX
+    this.position.y += this.velocityY
 
     // If bullet off the screen, remove it
     if (this.position.x < 0 || this.position.x > settings.game.nativeWidth) {

@@ -45,11 +45,17 @@ export const settings = {
     sniper: {
       cooldown: 3,
       rotationAmount: 3,
+      height: 150, 
+      width: 150,
     },
     wallBreaker: {
       cooldown: 0.5,
-      rotationAmount: 5
-    }
+      rotationAmount: 5,
+      height: 150, 
+      width: 150
+    },
+    maxGunAngle: 45,
+    minGunAngle: -45,
   },
 
   // Map settings
