@@ -21,6 +21,7 @@ export class GameManager {
     this.lastXMovementKeyPressed = ""
     this.lastRotationKeyPressed = ""
     this.gunSwitched = false
+    this.gunRotated = false
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
     this.sendRate = settings.game.frameRate; // How many ms between events sent to the server 
@@ -33,6 +34,7 @@ export class GameManager {
       } else if (event.key == 'r') {
         this.gunSwitched = true
       } else if (event.key == 'w' || event.key == "s") {
+        this.gunRotated = true
         this.lastRotationKeyPressed = event.key
       }
     });
@@ -48,6 +50,8 @@ export class GameManager {
       } else if (event.key === "s" && this.keys["s"]) {
         this.lastRotationKeyPressed = "s"
       }
+
+      if (!this.keys["w"] && !this.keys["s"]) this.gunRotated = false
     });
   }
 
@@ -109,6 +113,7 @@ export class GameManager {
       this.players[player.playerId].position.x = player.position.x
       this.players[player.playerId].position.y = player.position.y
       this.players[player.playerId].health = player.health
+      this.players[player.playerId].gunAngle = player.gunRotation
 
       // Perform server reconciliation
       if (player.playerId === this.curPlayerId) {
@@ -240,6 +245,16 @@ export class GameManager {
         }
         const bulletEvent = new CustomEvent("BULLET_FIRED", bulletUpdate)
         this.wsManager.send(bulletEvent);
+      }
+
+      // Gun rotation events
+      if (this.gunRotated) {
+        const gunRotationUpdate = {
+          playerId: this.curPlayerId,
+          keyPressed: this.lastRotationKeyPressed
+        }
+        const gunRotationEvent = new CustomEvent("GUN_ROTATION", gunRotationUpdate)
+        this.wsManager.send(gunRotationEvent);
       }
 
       this.lastSentTime = currentTime;

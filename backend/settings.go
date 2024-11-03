@@ -30,8 +30,10 @@ const (
 	wallbreakerBulletDamage = 100
 
 	// Gun settings
-	sniperCooldown      = 3
-	wallbreakerCooldown = 0.5
+	sniperCooldown            = 3
+	wallbreakerCooldown       = 0.5
+	sniperRotationAmount      = 3
+	wallbreakerRotationAmount = 5
 
 	// General game settings
 	nativeWidth     = 1920

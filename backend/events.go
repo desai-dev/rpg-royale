@@ -19,6 +19,7 @@ const (
 	EventCreateParty = "CREATE_PARTY"
 	EventJoinParty   = "JOIN_PARTY"
 	EventPlayerMoved = "PLAYER_MOVED"
+	EventGunRotation = "GUN_ROTATION"
 
 	// Events that come from server side
 	EventPartyCreated  = "PARTY_CREATED"
@@ -54,6 +55,12 @@ type PlayerMovedPayload struct {
 	InputNumber        int      `json:"inputNumber"`
 }
 
+// Payload structure for GUN_ROTATION event
+type GunRotationPayload struct {
+	PlayerId   int    `json:"playerId"`
+	KeyPressed string `json:"keyPressed"`
+}
+
 // ************* PAYLOADS FOR SENDING DATA TO CLIENT ************* //
 
 // Payload structure for player data
@@ -61,14 +68,16 @@ type PlayerData struct {
 	Position    Position `json:"position"`
 	PlayerId    int      `json:"playerId"`
 	Health      float64  `json:"health"`
+	GunRotation float64  `json:"gunRotation"`
 	InputNumber int      `json:"inputNumber"`
 }
 
 // Function to create PlayerData type
-func NewPlayerData(x float64, y float64, health float64, id int, inputNumber int) PlayerData {
+func NewPlayerData(x float64, y float64, health float64, gunRotation float64, id int, inputNumber int) PlayerData {
 	return PlayerData{
 		Position:    Position{x, y},
 		Health:      health,
+		GunRotation: gunRotation,
 		PlayerId:    id,
 		InputNumber: inputNumber,
 	}
@@ -102,7 +111,7 @@ func NewPlayersUpdatePayload(players []*Client) PlayersUpdatePayload {
 	data := []PlayerData{}
 
 	for _, player := range players {
-		playerData := NewPlayerData(player.position.X, player.position.Y, player.health, player.playerId, player.inputNumber)
+		playerData := NewPlayerData(player.position.X, player.position.Y, player.health, player.gunRotation, player.playerId, player.inputNumber)
 		data = append(data, playerData)
 	}
 	return PlayersUpdatePayload{

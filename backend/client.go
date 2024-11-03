@@ -19,6 +19,7 @@ type Client struct {
 	party         *Party
 	guns          []*Gun
 	curGunIdx     int
+	gunRotation   float64
 	inParty       bool
 	playerId      int
 	position      Position
@@ -48,6 +49,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		party:         nil,
 		guns:          []*Gun{sniper, wallbreaker},
 		curGunIdx:     0,
+		gunRotation:   0,
 		inParty:       false,
 		position:      Position{X: 0, Y: 0},
 		speedX:        playerSpeedX,
@@ -69,6 +71,11 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 func (c *Client) updatePosition(x float64, y float64) {
 	c.position.X = x
 	c.position.Y = y
+}
+
+// Updates a Clients gun rotation
+func (c *Client) updateGunRotation(gunRotationAmount float64) {
+	c.gunRotation += gunRotationAmount
 }
 
 // Respawns a player

@@ -1,16 +1,24 @@
 package main
 
 type Gun struct {
-	bulletType string
-	reloadTime float64
-	cooldown   float64
+	bulletType     string
+	reloadTime     float64
+	cooldown       float64
+	rotationAmount float64
 }
 
 func NewGun(bulletType string) *Gun {
+	var rotationAmount float64
+	if bulletType == "Sniper" { // TODO: get rid of hardcoded stuff
+		rotationAmount = sniperRotationAmount
+	} else if bulletType == "Wallbreaker" {
+		rotationAmount = wallbreakerRotationAmount
+	}
 	return &Gun{
-		bulletType: bulletType,
-		reloadTime: sniperCooldown,
-		cooldown:   0,
+		bulletType:     bulletType,
+		reloadTime:     sniperCooldown,
+		cooldown:       0,
+		rotationAmount: rotationAmount,
 	}
 }
 
