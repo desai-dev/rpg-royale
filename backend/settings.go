@@ -22,15 +22,15 @@ const (
 	// Bullet Settings
 	sniperBulletWidth       = 60
 	sniperBulletHeight      = 30
-	sniperBulletSpeedX      = 1000
-	sniperBulletDamage      = 20
+	sniperBulletSpeedX      = 1500
+	sniperBulletDamage      = 45
 	wallbreakerBulletWidth  = 30
 	wallbreakerBulletHeight = 30
-	wallbreakerBulletSpeedX = 3000
-	wallbreakerBulletDamage = 100
+	wallbreakerBulletSpeedX = 2000
+	wallbreakerBulletDamage = 10
 
 	// Gun settings
-	sniperCooldown            = 3
+	sniperCooldown            = 1.5
 	wallbreakerCooldown       = 0.5
 	sniperRotationAmount      = 3
 	wallbreakerRotationAmount = 5

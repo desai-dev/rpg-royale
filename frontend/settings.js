@@ -27,23 +27,21 @@ export const settings = {
     sniperBullet: {
       width: 60,
       height: 30,
-      speedX: 1000,
-      bulletCooldown: 3, // In seconds
-      bulletDamage: 20,
+      speedX: 1500,
+      bulletDamage: 45,
     },
     wallBreakerBullet: {
       width: 30,
       height: 30,
-      speedX: 3000,
-      bulletCooldown: 1, // In seconds
-      bulletDamage: 100,
+      speedX: 2000,
+      bulletDamage: 10,
     }
   },
 
   // Gun settings
   guns : {
     sniper: {
-      cooldown: 3,
+      cooldown: 1.5,
       rotationAmount: 3,
       height: 150, 
       width: 150,

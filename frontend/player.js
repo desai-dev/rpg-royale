@@ -22,7 +22,7 @@ export class Player {
     this.height = settings.player.height;
     this.guns = [
       new Gun(this.canvas,
-              "./assets/gun2.png",
+              "./assets/sniper.png",
               settings.guns.sniper.cooldown, 
               settings.guns.sniper.rotationAmount,
               settings.bullets.sniperBullet.speedX, 
@@ -33,7 +33,7 @@ export class Player {
               settings.guns.sniper.width,
             ),
       new Gun(this.canvas,
-              "./assets/gun.png",
+              "./assets/wallbreaker.png",
               settings.guns.wallBreaker.cooldown, 
               settings.guns.wallBreaker.rotationAmount,
               settings.bullets.wallBreakerBullet.speedX, 

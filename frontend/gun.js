@@ -79,8 +79,6 @@ export class Gun {
     this.canvas.rotate(gunAngle * Math.PI / 180);
 
     // Draw gun image centered at the translated origin
-    this.image.height = 150;
-    this.image.width = 150;
     this.canvas.drawImage(
       this.image,
       -this.image.width / 2,

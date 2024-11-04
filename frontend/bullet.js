@@ -32,7 +32,7 @@ export class Bullet {
     // Draw bullet
     this.canvas.beginPath();
     this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
-    this.canvas.fillStyle = "#c300ff"; 
+    this.canvas.fillStyle = "#004d1d"; 
     this.canvas.fill();
     this.canvas.closePath();
 
