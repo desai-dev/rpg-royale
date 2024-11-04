@@ -28,16 +28,27 @@ func NewGun(bulletType string) *Gun {
 
 func (g *Gun) shootBullet(player *Client, deltaTime float64) *Bullet {
 	radians := player.gunRotation * (math.Pi / 180)
-	velocityX := math.Cos(radians)
+	velocityX := math.Cos(radians) * float64(player.direction)
 	velocityY := math.Sin(radians)
+	var bulletX, bulletY float64
 
 	if g.bulletType == "Sniper" {
-		bulletX := player.position.X + sniperWidth*math.Cos(radians)
-		bulletY := player.position.Y + sniperWidth*math.Sin(radians)
+		if player.direction == -1 {
+			bulletX = player.position.X - (sniperWidth/2)*math.Cos(radians)
+			bulletY = player.position.Y + (sniperWidth/2)*math.Sin(radians)
+		} else {
+			bulletX = player.position.X + (sniperWidth/2)*math.Cos(radians)
+			bulletY = player.position.Y + (sniperWidth/2)*math.Sin(radians)
+		}
 		return NewSniperBullet(player.playerId, velocityX, velocityY, bulletX, bulletY, deltaTime)
 	} else {
-		bulletX := player.position.X + wallbreakerWidth*math.Cos(radians)
-		bulletY := player.position.Y + wallbreakerWidth*math.Sin(radians)
+		if player.direction == -1 {
+			bulletX = player.position.X - (wallbreakerWidth/2)*math.Cos(radians)
+			bulletY = player.position.Y + (wallbreakerWidth/2)*math.Sin(radians)
+		} else {
+			bulletX = player.position.X + (wallbreakerWidth/2)*math.Cos(radians)
+			bulletY = player.position.Y + (wallbreakerWidth/2)*math.Sin(radians)
+		}
 		return NewWallbreakerBullet(player.playerId, velocityX, velocityY, bulletX, bulletY, deltaTime)
 	}
 }

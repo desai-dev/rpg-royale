@@ -113,6 +113,9 @@ export class GameManager {
       this.players[player.playerId].position.x = player.position.x
       this.players[player.playerId].position.y = player.position.y
       this.players[player.playerId].health = player.health
+      this.players[player.playerId].curGunIndex = player.curGunIdx
+      this.players[player.playerId].curGun = this.players[player.playerId].guns[player.curGunIdx]
+      this.players[player.playerId].direction = player.gunDirection
       this.players[player.playerId].gunAngle = player.gunRotation
 
       // Perform server reconciliation
@@ -206,8 +209,8 @@ export class GameManager {
     }
 
     // Rotate gun
-    if (this.keys['w'] || this.keys['s']) {
-      this.players[this.curPlayerId].rotateGun(this.keys['w'], this.keys['s'], this.lastRotationKeyPressed)
+    if (this.keys['w'] || this.keys['s'] || this.keys['ArrowLeft'] || this.keys['ArrowRight']) {
+      this.players[this.curPlayerId].rotateGun(this.keys['w'], this.keys['s'], this.lastRotationKeyPressed, this.lastXMovementKeyPressed)
     }
 
     // Switch guns

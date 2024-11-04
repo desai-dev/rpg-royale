@@ -27,18 +27,31 @@ export class Gun {
     if (this.canShoot()) {
       this.cooldown = this.reloadTime;
 
+      var direction = 1
+      if (lastXMovementKeyPressed == "ArrowRight") {
+        direction = 1
+      } else if (lastXMovementKeyPressed == "ArrowLeft") {
+        direction = -1
+      }
+
       const angleInRadians = curPlayer.gunAngle * (Math.PI / 180);
       const velocityX = this.bulletSpeedX * Math.cos(angleInRadians);
       const velocityY = this.bulletSpeedX * Math.sin(angleInRadians);
 
-      var bulletX = curPlayer.position.x + this.width * Math.cos(angleInRadians)
-      var bulletY = curPlayer.position.y + this.width * Math.sin(angleInRadians)
+      var bulletX = curPlayer.position.x + (this.width / 2) * Math.cos(angleInRadians);
+      var bulletY = curPlayer.position.y + (this.height / 2) * Math.sin(angleInRadians);
+
+      // Adjust for direction
+      if (direction < 0) {
+        bulletX = curPlayer.position.x - (this.width / 2) * Math.cos(angleInRadians);
+        bulletY = curPlayer.position.y + (this.height / 2) * Math.sin(angleInRadians);
+      }
 
       return new Bullet(
           { x: bulletX,
             y: bulletY
           },
-          velocityX * deltaTime,
+          velocityX * direction * deltaTime,
           velocityY * deltaTime,
           this.bulletWidth,
           this.bulletHeight,
@@ -54,7 +67,7 @@ export class Gun {
     this.cooldown = Math.max(this.cooldown - deltaTime, 0);
   }
 
-  draw(gunX, gunY, gunAngle) {
+  draw(gunX, gunY, gunAngle, direction) {
     // Save canvas state
     this.canvas.save();
 
@@ -62,6 +75,7 @@ export class Gun {
     this.canvas.translate(gunX, gunY);
   
     // Apply gun rotation
+    this.canvas.scale(direction, 1);
     this.canvas.rotate(gunAngle * Math.PI / 180);
 
     // Draw gun image centered at the translated origin

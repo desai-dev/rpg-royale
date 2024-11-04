@@ -66,21 +66,25 @@ type GunRotationPayload struct {
 
 // Payload structure for player data
 type PlayerData struct {
-	Position    Position `json:"position"`
-	PlayerId    int      `json:"playerId"`
-	Health      float64  `json:"health"`
-	GunRotation float64  `json:"gunRotation"`
-	InputNumber int      `json:"inputNumber"`
+	Position        Position `json:"position"`
+	PlayerId        int      `json:"playerId"`
+	Health          float64  `json:"health"`
+	GunRotation     float64  `json:"gunRotation"`
+	GunDirection    int      `json:"gunDirection"`
+	CurrentGunindex int      `json:"curGunIdx"`
+	InputNumber     int      `json:"inputNumber"`
 }
 
 // Function to create PlayerData type
-func NewPlayerData(x float64, y float64, health float64, gunRotation float64, id int, inputNumber int) PlayerData {
+func NewPlayerData(x float64, y float64, health float64, gunRotation float64, gunDirection int, curGunIdx int, id int, inputNumber int) PlayerData {
 	return PlayerData{
-		Position:    Position{x, y},
-		Health:      health,
-		GunRotation: gunRotation,
-		PlayerId:    id,
-		InputNumber: inputNumber,
+		Position:        Position{x, y},
+		Health:          health,
+		GunRotation:     gunRotation,
+		GunDirection:    gunDirection,
+		CurrentGunindex: curGunIdx,
+		PlayerId:        id,
+		InputNumber:     inputNumber,
 	}
 }
 
@@ -112,7 +116,7 @@ func NewPlayersUpdatePayload(players []*Client) PlayersUpdatePayload {
 	data := []PlayerData{}
 
 	for _, player := range players {
-		playerData := NewPlayerData(player.position.X, player.position.Y, player.health, player.gunRotation, player.playerId, player.inputNumber)
+		playerData := NewPlayerData(player.position.X, player.position.Y, player.health, player.gunRotation, player.direction, player.curGunIdx, player.playerId, player.inputNumber)
 		data = append(data, playerData)
 	}
 	return PlayersUpdatePayload{

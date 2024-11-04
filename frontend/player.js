@@ -47,6 +47,7 @@ export class Player {
     this.curGunIndex = 0;
     this.curGun = this.guns[this.curGunIndex];
     this.gunAngle = 0;
+    this.direction = 1;
   }
 
   checkHorizontalCollisions() {
@@ -114,7 +115,13 @@ export class Player {
     this.curGun = this.guns[this.curGunIndex]
   }
 
-  rotateGun(upKey, downKey, lastRotateKey) {
+  rotateGun(upKey, downKey, lastRotateKey, lastXMovementKeyPressed) {
+    if (lastXMovementKeyPressed == "ArrowRight") {
+      this.direction = 1
+    } else if (lastXMovementKeyPressed == "ArrowLeft") {
+      this.direction = -1
+    }
+
     if (upKey && downKey) {
       if (lastRotateKey == 'w' && this.gunAngle > settings.guns.minGunAngle) {
         this.gunAngle -= this.curGun.rotationAmount
@@ -155,7 +162,7 @@ export class Player {
       // Draw gun
       const gunX = this.position.x + this.width / 2;
       const gunY = this.position.y + this.height / 2;
-      this.curGun.draw(gunX, gunY, this.gunAngle);
+      this.curGun.draw(gunX, gunY, this.gunAngle, this.direction);
     }
   }
 

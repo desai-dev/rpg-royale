@@ -27,6 +27,7 @@ type Client struct {
 	speedX        float64
 	velocityY     float64
 	lastXMovement string
+	direction     int
 	jumpPower     float64
 	isGrounded    bool
 	health        float64
@@ -56,6 +57,7 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		velocityX:     0,
 		velocityY:     0,
 		lastXMovement: "",
+		direction:     1,
 		jumpPower:     playerJumpPower,
 		isGrounded:    false,
 		health:        playerHealth,

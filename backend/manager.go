@@ -170,9 +170,11 @@ func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 		if key == "ArrowLeft" {
 			client.lastXMovement = key
 			client.velocityX = -client.speedX * payload.TimeSinceLastEvent
+			client.direction = -1
 		} else if key == "ArrowRight" {
 			client.lastXMovement = key
 			client.velocityX = client.speedX * payload.TimeSinceLastEvent
+			client.direction = 1
 		} else if key == "ArrowUp" && client.isGrounded {
 			client.isGrounded = false
 			client.velocityY = client.jumpPower * payload.TimeSinceLastEvent

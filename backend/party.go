@@ -76,7 +76,7 @@ func (p *Party) initializeGame() {
 		// Set player position
 		p.players[i].updatePosition(rand.Float64()*playerSpawnMaxX, 0)
 
-		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, playerHealth, 0, i, -1) // Change gun rotation to be a setting
+		playerData := NewPlayerData(p.players[i].position.X, p.players[i].position.Y, playerHealth, 0, 1, 0, i, -1) // Change gun rotation to be a setting
 		payload.PlayersData = append(payload.PlayersData, playerData)
 	}
 
