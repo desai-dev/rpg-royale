@@ -243,6 +243,7 @@ func (p *Party) checkVerticalCollisions() {
 	}
 }
 
+// Sends updated player data to clients
 func (p *Party) sendPlayerData() {
 	payload := NewPlayersUpdatePayload(p.players)
 	payloadBytes, err := json.Marshal(payload)
@@ -261,6 +262,7 @@ func (p *Party) sendPlayerData() {
 	}
 }
 
+// Sends updated bullet data to clients
 func (p *Party) sendBulletData() {
 	p.mutex.Lock()
 

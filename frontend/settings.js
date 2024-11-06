@@ -48,7 +48,7 @@ export const settings = {
     },
     wallBreaker: {
       cooldown: 0.5,
-      rotationAmount: 5,
+      rotationAmount: 3,
       height: 150, 
       width: 150
     },

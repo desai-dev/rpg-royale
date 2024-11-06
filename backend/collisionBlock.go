@@ -1,5 +1,6 @@
 package main
 
+// A Collision Block
 type CollisionBlock struct {
 	position Position
 	width    float64

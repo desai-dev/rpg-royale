@@ -129,6 +129,7 @@ type PartyCreatedPayload struct {
 	PartyID string `json:"partyID"`
 }
 
+// Function to create PartyCreatedPayload type
 func NewPartyCreatedPayload(partyId string) PartyCreatedPayload {
 	return PartyCreatedPayload{
 		PartyID: partyId,

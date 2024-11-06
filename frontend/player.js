@@ -152,7 +152,7 @@ export class Player {
       // Draw player
       this.canvas.beginPath();
       this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
-      this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#FF0000"; 
+      this.canvas.fillStyle = this.playerId === this.curPlayerId ? "#0000FF" : "#800020"; 
       this.canvas.fill();
       this.canvas.closePath();
 

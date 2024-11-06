@@ -41,14 +41,30 @@ type Client struct {
 
 // Initializes a new client
 func NewClient(conn *websocket.Conn, manager *Manager) *Client {
-	sniper := NewGun("Sniper")
-	wallbreaker := NewGun("Wallbreaker")
+	// Initialize bullet types
+	sniperBullet := &BulletType{
+		width:  sniperBulletWidth,
+		height: sniperBulletHeight,
+		speed:  sniperBulletSpeedX,
+		damage: sniperBulletDamage,
+		name:   "Sniper",
+	}
+	wallbreakerBullet := &BulletType{
+		width:  wallbreakerBulletWidth,
+		height: wallbreakerBulletHeight,
+		speed:  wallbreakerBulletSpeedX,
+		damage: wallbreakerBulletDamage,
+		name:   "Wallbreaker",
+	}
 
 	return &Client{
-		connection:    conn,
-		manager:       manager,
-		party:         nil,
-		guns:          []*Gun{sniper, wallbreaker},
+		connection: conn,
+		manager:    manager,
+		party:      nil,
+		guns: []*Gun{
+			NewGun(sniperBullet, sniperCooldown, sniperRotationAmount, sniperWidth, sniperHeight),
+			NewGun(wallbreakerBullet, wallbreakerCooldown, wallbreakerRotationAmount, wallbreakerWidth, wallbreakerHeight),
+		},
 		curGunIdx:     0,
 		gunRotation:   0,
 		inParty:       false,

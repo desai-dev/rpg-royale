@@ -33,7 +33,7 @@ const (
 	sniperCooldown            = 1.5
 	wallbreakerCooldown       = 0.5
 	sniperRotationAmount      = 3
-	wallbreakerRotationAmount = 5
+	wallbreakerRotationAmount = 3
 	sniperHeight              = 150
 	sniperWidth               = 150
 	wallbreakerHeight         = 150

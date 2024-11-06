@@ -152,6 +152,7 @@ func (m *Manager) joinParty(c *Client, partyID string) {
 
 }
 
+// Player moved event handler
 func PlayerMoved(event Event, m *Manager, c *Client) error {
 	var payload PlayerMovedPayload
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -162,6 +163,7 @@ func PlayerMoved(event Event, m *Manager, c *Client) error {
 	return nil
 }
 
+// Updates client positions AND clients' current gun
 func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 	client.inputNumber = payload.InputNumber
 	client.velocityX = 0
@@ -179,11 +181,12 @@ func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 			client.isGrounded = false
 			client.velocityY = client.jumpPower * payload.TimeSinceLastEvent
 		} else if key == "r" {
-			client.switchGun()
+			client.switchGun() // TODO: Take this out of this function
 		}
 	}
 }
 
+// Bullet fired event handler
 func BulletFired(event Event, m *Manager, c *Client) error {
 	var payload BulletFiredPayload
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -194,10 +197,12 @@ func BulletFired(event Event, m *Manager, c *Client) error {
 	return nil
 }
 
+// Fires a bullet
 func (m *Manager) bulletFired(client *Client, payload BulletFiredPayload) {
 	client.party.fireBullet(payload.PlayerId, payload.TimeSinceLastEvent)
 }
 
+// Gun roteted event handler
 func GunRotated(event Event, m *Manager, c *Client) error {
 	var payload GunRotationPayload
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -208,6 +213,7 @@ func GunRotated(event Event, m *Manager, c *Client) error {
 	return nil
 }
 
+// Rotates the clients gun up or down
 func (m *Manager) gunRotated(client *Client, payload GunRotationPayload) {
 	if payload.KeyPressed == "w" && client.gunRotation > minGunAngle {
 		client.updateGunRotation(-client.guns[client.curGunIdx].rotationAmount)

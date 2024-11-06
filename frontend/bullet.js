@@ -10,6 +10,9 @@ export class Bullet {
     this.width = width;
     this.height = height;
     this.collisionBlocks = collisionBlocks;
+
+    this.image = new Image();
+    this.image.src = "./assets/wallbreaker-bullet.png";
   }
 
   // Draws a bullet and returns whether or not that bullet is off the screen
@@ -35,6 +38,23 @@ export class Bullet {
     this.canvas.fillStyle = "#004d1d"; 
     this.canvas.fill();
     this.canvas.closePath();
+
+    // Define the visual dimensions you want for the bullet image
+    const displayWidth = 100;
+    const displayHeight = 100;
+
+    // Calculate offsets to keep the image centered on the hitbox
+    const offsetX = (displayWidth - this.width) / 2;
+    const offsetY = (displayHeight - this.height) / 2;
+
+    // Draw the bullet image with the specified display size, centered on the hitbox
+    this.canvas.drawImage(
+        this.image,
+        this.position.x - offsetX,
+        this.position.y - offsetY,
+        displayWidth,
+        displayHeight
+    );
 
     return true;
   }

@@ -14,6 +14,7 @@ func setupRoutes() {
 	http.HandleFunc("/ws", manager.serveWS)
 }
 
+// Entry point of the server
 func main() {
 	setupRoutes()
 	log.Fatal(http.ListenAndServe(":8080", nil))

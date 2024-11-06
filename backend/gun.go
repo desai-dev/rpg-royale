@@ -4,51 +4,46 @@ import (
 	"math"
 )
 
+// A Gun
 type Gun struct {
-	bulletType     string
+	bulletType     *BulletType
 	reloadTime     float64
 	cooldown       float64
 	rotationAmount float64
+	width          float64
+	height         float64
 }
 
-func NewGun(bulletType string) *Gun {
-	var rotationAmount float64
-	if bulletType == "Sniper" { // TODO: get rid of hardcoded stuff
-		rotationAmount = sniperRotationAmount
-	} else if bulletType == "Wallbreaker" {
-		rotationAmount = wallbreakerRotationAmount
-	}
+// Initializes a new gun
+func NewGun(bulletType *BulletType, reloadTime float64, rotationAmount float64, width float64, height float64) *Gun {
 	return &Gun{
 		bulletType:     bulletType,
-		reloadTime:     sniperCooldown,
+		reloadTime:     reloadTime,
 		cooldown:       0,
 		rotationAmount: rotationAmount,
+		width:          width,
+		height:         height,
 	}
 }
 
+// Creates a Bullet based on client position and gun angle
 func (g *Gun) shootBullet(player *Client, deltaTime float64) *Bullet {
 	radians := player.gunRotation * (math.Pi / 180)
 	velocityX := math.Cos(radians) * float64(player.direction)
 	velocityY := math.Sin(radians)
-	var bulletX, bulletY float64
 
-	if g.bulletType == "Sniper" {
-		if player.direction == -1 {
-			bulletX = player.position.X - (sniperWidth/2)*math.Cos(radians)
-			bulletY = player.position.Y + (sniperWidth/2)*math.Sin(radians)
-		} else {
-			bulletX = player.position.X + (sniperWidth/2)*math.Cos(radians)
-			bulletY = player.position.Y + (sniperWidth/2)*math.Sin(radians)
-		}
-		return NewSniperBullet(player.playerId, velocityX, velocityY, bulletX, bulletY, deltaTime)
+	// Adjust initial position based on direction and bullet width
+	var offsetX, offsetY float64
+	if player.direction == -1 {
+		offsetX = -g.width / 2 * math.Cos(radians)
+		offsetY = g.height / 2 * math.Sin(radians)
 	} else {
-		if player.direction == -1 {
-			bulletX = player.position.X - (wallbreakerWidth/2)*math.Cos(radians)
-			bulletY = player.position.Y + (wallbreakerWidth/2)*math.Sin(radians)
-		} else {
-			bulletX = player.position.X + (wallbreakerWidth/2)*math.Cos(radians)
-			bulletY = player.position.Y + (wallbreakerWidth/2)*math.Sin(radians)
-		}
-		return NewWallbreakerBullet(player.playerId, velocityX, velocityY, bulletX, bulletY, deltaTime)
+		offsetX = g.width / 2 * math.Cos(radians)
+		offsetY = g.height / 2 * math.Sin(radians)
 	}
+
+	bulletX := player.position.X + offsetX
+	bulletY := player.position.Y + offsetY
+
+	return NewBullet(player.playerId, g.bulletType, velocityX, velocityY, bulletX, bulletY, deltaTime)
 }
