@@ -275,6 +275,7 @@ func (p *Party) sendBulletData() {
 				VelocityY: bullet.velocityY,
 				Width:     bullet.width,
 				Height:    bullet.height,
+				Name:      bullet.name,
 			}
 
 			payloadBytes, err := json.Marshal(bulletUpdate)

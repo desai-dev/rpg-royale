@@ -139,6 +139,7 @@ export class GameManager {
   
   handleBulletFired(payload) {
     this.bullets.push(new Bullet(
+      payload.name,
       { x: payload.position.x, y: payload.position.y },
       payload.velocityX,
       payload.velocityY,

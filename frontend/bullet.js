@@ -2,7 +2,8 @@ import { checkCollision } from "./collision.js"
 import { settings } from "./settings.js";
 
 export class Bullet {
-  constructor(position, velocityX, velocityY, width, height, collisionBlocks, canvas) {
+  constructor(name, position, velocityX, velocityY, width, height, collisionBlocks, canvas) {
+    this.name = name
     this.velocityX = velocityX;
     this.velocityY = velocityY;
     this.position = position;
@@ -12,7 +13,15 @@ export class Bullet {
     this.collisionBlocks = collisionBlocks;
 
     this.image = new Image();
-    this.image.src = "./assets/wallbreaker-bullet.png";
+    if (this.name == "Sniper") { // TODO: Add these names to settings
+      this.image.src = "./assets/sniper-bullet.png";
+      this.displayWidth = 100 // TODO: Add these to settings
+      this.displayHeight = 100
+    } else if (this.name == "Wallbreaker") {
+      this.image.src = "./assets/wallbreaker-bullet.png";
+      this.displayWidth = 60
+      this.displayHeight = 60
+    }
   }
 
   // Draws a bullet and returns whether or not that bullet is off the screen
@@ -32,28 +41,24 @@ export class Bullet {
       }
     }
 
-    // Draw bullet
-    this.canvas.beginPath();
-    this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
-    this.canvas.fillStyle = "#004d1d"; 
-    this.canvas.fill();
-    this.canvas.closePath();
-
-    // Define the visual dimensions you want for the bullet image
-    const displayWidth = 100;
-    const displayHeight = 100;
+    // Leave this to see bullet hitboxes
+    // this.canvas.beginPath();
+    // this.canvas.rect(this.position.x, this.position.y, this.width, this.height);
+    // this.canvas.fillStyle = "#FF0000"; 
+    // this.canvas.fill();
+    // this.canvas.closePath();
 
     // Calculate offsets to keep the image centered on the hitbox
-    const offsetX = (displayWidth - this.width) / 2;
-    const offsetY = (displayHeight - this.height) / 2;
+    const offsetX = (this.displayWidth - this.width) / 2;
+    const offsetY = (this.displayHeight - this.height) / 2;
 
     // Draw the bullet image with the specified display size, centered on the hitbox
     this.canvas.drawImage(
         this.image,
         this.position.x - offsetX,
         this.position.y - offsetY,
-        displayWidth,
-        displayHeight
+        this.displayWidth,
+        this.displayHeight
     );
 
     return true;

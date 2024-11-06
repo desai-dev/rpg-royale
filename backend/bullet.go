@@ -9,6 +9,7 @@ type Bullet struct {
 	width     float64
 	height    float64
 	damage    float64
+	name      string
 }
 
 // Stores information for a type of bullet
@@ -30,6 +31,7 @@ func NewBullet(playerId int, bulletType *BulletType, velocityX float64, velocity
 		width:     bulletType.width,
 		height:    bulletType.height,
 		damage:    bulletType.damage,
+		name:      bulletType.name,
 	}
 }
 

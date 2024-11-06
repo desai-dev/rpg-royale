@@ -2,7 +2,8 @@ import { Bullet } from './bullet.js'
 import { settings } from './settings.js';
 
 export class Gun {
-  constructor(canvas, imgSrc, reloadTime, rotationAmount, bulletSpeedX, bulletDamage, bulletWidth, bulletHeight, height, width) {
+  constructor(name, canvas, imgSrc, reloadTime, rotationAmount, bulletSpeedX, bulletDamage, bulletWidth, bulletHeight, height, width) {
+    this.name = name;
     this.canvas = canvas
     this.reloadTime = reloadTime;
     this.cooldown = 0;
@@ -48,6 +49,7 @@ export class Gun {
       }
 
       return new Bullet(
+          this.name, 
           { x: bulletX,
             y: bulletY
           },
