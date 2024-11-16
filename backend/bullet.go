@@ -36,10 +36,11 @@ func NewBullet(playerId int, bulletType *BulletType, velocityX float64, velocity
 }
 
 // Updates a bullets position to the given x and y coordinates
+// and returns true if it is not off the screen
 func (b *Bullet) updatePosition(x float64, y float64) bool {
 	b.position.X = x
 	b.position.Y = y
-	return !(b.position.X < 0 || b.position.X > nativeWidth)
+	return !(b.position.X < 0 || b.position.X > nativeWidth || b.position.Y < 0 || b.position.Y > nativeHeight)
 }
 
 //////// ******** Functions for Collider interface implementation ******** ////////

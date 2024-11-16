@@ -43,6 +43,7 @@ const (
 
 	// General game settings
 	nativeWidth     = 1920
+	nativeHeight    = 1080
 	gravityConstant = 0.5
 	frameRate       = 15
 )

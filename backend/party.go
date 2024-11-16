@@ -17,12 +17,12 @@ type Party struct {
 	players         []*Client
 	collisionBlocks []*CollisionBlock
 	bullets         []*Bullet
-	unsentBullets   []*Bullet // Any array of bullet updates that need to be sent to clients
+	bulletQueue     *SharedQueue[*Bullet]
 	partySize       int
 	gravity         float64
 	maxFallSpeed    float64
 	updateMs        int
-	stop            chan bool // Channel to stop the ticker
+	stop            chan bool // Channel to stop the game ticker
 	mutex           sync.Mutex
 }
 
@@ -33,7 +33,7 @@ func NewParty(partyID string) *Party {
 		players:         make([]*Client, 0),
 		collisionBlocks: make([]*CollisionBlock, 0),
 		bullets:         make([]*Bullet, 0),
-		unsentBullets:   make([]*Bullet, 0),
+		bulletQueue:     &SharedQueue[*Bullet]{items: make([]*Bullet, 0)},
 		partySize:       0,
 		gravity:         gravityConstant,
 		maxFallSpeed:    playerMaxFallSpeed,
@@ -268,10 +268,9 @@ func (p *Party) sendPlayerData() {
 
 // Sends updated bullet data to clients
 func (p *Party) sendBulletData() {
-	p.mutex.Lock()
-
-	if len(p.unsentBullets) > 0 {
-		for _, bullet := range p.unsentBullets {
+	unsentBullets := p.bulletQueue.DequeueBatch()
+	if len(unsentBullets) > 0 {
+		for _, bullet := range unsentBullets {
 			bulletUpdate := BulletFiredPayload{
 				PlayerId:  bullet.playerId,
 				Position:  Position{X: bullet.position.X, Y: bullet.position.Y},
@@ -300,10 +299,7 @@ func (p *Party) sendBulletData() {
 				}
 			}
 		}
-		p.unsentBullets = []*Bullet{}
 	}
-
-	p.mutex.Unlock()
 }
 
 // Sends updated map data to clients
@@ -341,17 +337,11 @@ func (p *Party) sendMapData() {
 
 // Fires a bullet from the given clients position
 func (p *Party) fireBullet(playerId int, deltaTime float64) {
-	// Lock mutex because we are modifying p.unsentBullets which might
-	// be accessed by another go routine
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
 	playerGun := p.players[playerId].guns[p.players[playerId].curGunIdx]
 	bullet := playerGun.shootBullet(p.players[playerId], deltaTime)
 
 	p.bullets = append(p.bullets, bullet)
-
-	p.unsentBullets = append(p.unsentBullets, bullet)
+	p.bulletQueue.Enqueue(bullet)
 }
 
 // Places a block if its valid to place
