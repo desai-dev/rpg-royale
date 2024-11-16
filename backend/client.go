@@ -64,8 +64,20 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		manager:    manager,
 		party:      nil,
 		guns: []*Gun{
-			NewGun(sniperBullet, sniperCooldown, sniperRotationAmount, sniperWidth, sniperHeight),
-			NewGun(wallbreakerBullet, wallbreakerCooldown, wallbreakerRotationAmount, wallbreakerWidth, wallbreakerHeight),
+			NewGun(
+				sniperBullet,
+				sniperCooldown,
+				sniperRotationAmount,
+				sniperWidth,
+				sniperHeight,
+			),
+			NewGun(
+				wallbreakerBullet,
+				wallbreakerCooldown,
+				wallbreakerRotationAmount,
+				wallbreakerWidth,
+				wallbreakerHeight,
+			),
 		},
 		curGunIdx:     0,
 		gunRotation:   0,

@@ -132,7 +132,16 @@ func NewPlayersUpdatePayload(players []*Client) PlayersUpdatePayload {
 	data := []PlayerData{}
 
 	for _, player := range players {
-		playerData := NewPlayerData(player.position.X, player.position.Y, player.health, player.gunRotation, player.direction, player.curGunIdx, player.playerId, player.inputNumber)
+		playerData := NewPlayerData(
+			player.position.X,
+			player.position.Y,
+			player.health,
+			player.gunRotation,
+			player.direction,
+			player.curGunIdx,
+			player.playerId,
+			player.inputNumber,
+		)
 		data = append(data, playerData)
 	}
 	return PlayersUpdatePayload{
