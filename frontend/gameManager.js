@@ -6,6 +6,11 @@ import { settings } from './settings.js'
 
 export class GameManager {
   constructor(wsManager) {
+    this.canvasCenterX = null;
+    this.canvasCenterY = null;
+    this.mapCenterX = null;
+    this.mapCenterY = null;
+    this.scaleFitNative = null;
     const canvas = document.getElementById("myCanvas");
     this.canvas = canvas.getContext("2d");
     this.wsManager = wsManager;
@@ -25,6 +30,8 @@ export class GameManager {
     this.lastFrameTime = 0; // Tracks last time a frame was fetched
     this.lastSentTime = 0; // Tracks the last time an event was sent to the server
     this.sendRate = settings.game.frameRate; // How many ms between events sent to the server 
+    this.placeBuild = false
+    this.newBlocks = []
 
     // Event listeners for key presses
     window.addEventListener('keydown', (event) => {
@@ -36,6 +43,10 @@ export class GameManager {
       } else if (event.key == 'w' || event.key == "s") {
         this.gunRotated = true
         this.lastRotationKeyPressed = event.key
+      } else if (event.key === "b") {
+        this.players[this.curPlayerId].toggleBuildingMode()
+      } else if (event.key == "c") {
+        this.placeBuild = true
       }
     });
 
@@ -49,9 +60,25 @@ export class GameManager {
         this.lastRotationKeyPressed = "w"
       } else if (event.key === "s" && this.keys["s"]) {
         this.lastRotationKeyPressed = "s"
+      } else if (event.key == "c") {
+        this.placeBuild = false
       }
 
       if (!this.keys["w"] && !this.keys["s"]) this.gunRotated = false
+    });
+
+    window.addEventListener("mousemove", (event) => {
+      if (this.players.length != 0) {
+        const rect = this.canvas.canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+  
+        // Adjust coordinates for the canvas transformation
+        const translatedX = (mouseX - (this.canvasCenterX - this.mapCenterX * this.scaleFitNative)) / this.scaleFitNative;
+        const translatedY = (mouseY - (this.canvasCenterY - this.mapCenterY * this.scaleFitNative)) / this.scaleFitNative;
+  
+        this.players[this.curPlayerId].updateMousePositions(translatedX, translatedY)
+      }
     });
   }
 
@@ -64,9 +91,19 @@ export class GameManager {
       this.handlePlayersUpdate(event.payload);
     } else if (event.type == "BULLET_FIRED") {
       this.handleBulletFired(event.payload);
+    } else if (event.type == "MAP_UPDATE") {
+      this.handleMapUpdate(event.payload);
     } else {
       console.log("Not an event");
     }
+  }
+
+  updateGameDimensions(canvasCenterX, canvasCenterY, mapCenterX, mapCenterY, scaleFitNative) {
+    this.canvasCenterX = canvasCenterX;
+    this.canvasCenterY = canvasCenterY;
+    this.mapCenterX = mapCenterX;
+    this.mapCenterY = mapCenterY;
+    this.scaleFitNative = scaleFitNative;
   }
 
   handleGameStart(payload) {
@@ -93,6 +130,10 @@ export class GameManager {
         this.collisionBlocks,
         this.canvas
       ))
+    }
+
+    for (const player of this.players) {
+      player.players = this.players
     }
 
     // Start game
@@ -148,6 +189,15 @@ export class GameManager {
       this.collisionBlocks,
       this.canvas
     ));
+  }
+
+  async handleMapUpdate(payload) {
+    this.collisionBlocks = payload.blocks.map(blockData => {
+      return new CollisionBlock({x: blockData.position.x / settings.collisionBlock.width, y: blockData.position.y / settings.collisionBlock.height}, this.canvas);
+    });
+    for (var player of this.players) {
+      player.collisionBlocks = this.collisionBlocks
+    } 
   }
 
   startGameLoop() {
@@ -230,8 +280,20 @@ export class GameManager {
       bulletFired = true;
     }
 
+    // Place builds
+    var placedBlock = null
+    if (this.players[this.curPlayerId].buildingMode) pressedKeys.push("b")
+    if (this.placeBuild) pressedKeys.push("c")
+    if (this.players[this.curPlayerId].buildingMode && this.placeBuild) {
+      if (this.players[this.curPlayerId].closestValidBlock) {
+        placedBlock = this.players[this.curPlayerId].closestValidBlock
+        this.collisionBlocks.push(this.players[this.curPlayerId].closestValidBlock);
+        this.players[this.curPlayerId].closestValidBlock = null;
+      }
+    }
+
     // Send events to server every "sendRate" ms
-    if (currentTime - this.lastSentTime > this.sendRate) {
+    if (currentTime - this.lastSentTime > this.sendRate) { // TODO: Group all the events into one big payload
       // Movement events
       const updatedPosition = {
         playerId: this.curPlayerId,
@@ -264,6 +326,16 @@ export class GameManager {
         this.wsManager.send(gunRotationEvent);
       }
 
+      // Block placement events
+      if (placedBlock) {
+        const blockPlacedUpdate = {
+          playerId: this.curPlayerId,
+          block: placedBlock
+        }
+        const blockPlacedEvent = new CustomEvent("BLOCK_PLACED", blockPlacedUpdate)
+        this.wsManager.send(blockPlacedEvent);
+      }
+
       this.lastSentTime = currentTime;
     } 
   }
@@ -277,7 +349,6 @@ export class GameManager {
 
   draw() {
     this.clearRect();
-
     this.collisionBlocks.forEach(collisionBlock => {
       collisionBlock.update()
     })

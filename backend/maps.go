@@ -72,15 +72,36 @@ var defaultMap = [][2]int{
 }
 
 func initializeDefaultMap() {
+	// Create a map to track coordinates already in defaultMap
+	existingPositions := make(map[[2]int]bool)
+	for _, pos := range defaultMap {
+		existingPositions[pos] = true
+	}
+
+	// Add bottom row
 	for x := 0; x < 64; x++ {
-		defaultMap = append(defaultMap, [2]int{x, 35})
+		pos := [2]int{x, 35}
+		if !existingPositions[pos] {
+			defaultMap = append(defaultMap, pos)
+			existingPositions[pos] = true
+		}
 	}
 
+	// Add left column
 	for y1 := 0; y1 < 36; y1++ {
-		defaultMap = append(defaultMap, [2]int{0, y1})
+		pos := [2]int{0, y1}
+		if !existingPositions[pos] {
+			defaultMap = append(defaultMap, pos)
+			existingPositions[pos] = true
+		}
 	}
 
+	// Add right column
 	for y2 := 0; y2 < 36; y2++ {
-		defaultMap = append(defaultMap, [2]int{63, y2})
+		pos := [2]int{63, y2}
+		if !existingPositions[pos] {
+			defaultMap = append(defaultMap, pos)
+			existingPositions[pos] = true
+		}
 	}
 }

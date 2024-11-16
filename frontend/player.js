@@ -1,9 +1,11 @@
 import { Gun } from "./gun.js"
 import { checkCollision } from "./collision.js";
 import { settings } from "./settings.js";
+import { CollisionBlock } from "./collisionBlock.js";
 
 export class Player {
   constructor(playerId, curPlayerId, position, collisionBlocks, canvas) {
+    this.players = null
     this.playerId = playerId;
     this.curPlayerId = curPlayerId;
     this.velocityX = 0;
@@ -50,6 +52,10 @@ export class Player {
     this.curGun = this.guns[this.curGunIndex];
     this.gunAngle = 0;
     this.direction = 1;
+    this.buildingMode = false;
+    this.closestValidBlock = null;
+    this.mouseX = 0
+    this.mouseY = 0
   }
 
   checkHorizontalCollisions() {
@@ -137,6 +143,67 @@ export class Player {
     }
   }
 
+  updateMousePositions(x, y) {
+    this.mouseX = x
+    this.mouseY = y
+  }
+
+  toggleBuildingMode() {
+    this.buildingMode = !this.buildingMode;
+    if (!this.buildingMode) {
+      this.closestValidBlock = null;
+    }
+  }
+
+  isValidPlacement(position) {
+    // Check if the block collides with any other player
+    const a = {
+      position: { x: position.x, y: position.y },
+      width: settings.collisionBlock.width,
+      height: settings.collisionBlock.height,
+    };
+
+    for (const player of this.players) {
+      if (checkCollision(a, player)) return false
+    }
+
+    return true
+  }
+
+  findClosestValidPlacement() {
+    var closestBlock = null;
+    var minDistance = Infinity;
+
+    for (var block of this.collisionBlocks) {
+      // Get adjacent positions around the block
+      const adjacentPositions = [
+        { x: block.position.x, y: block.position.y - block.height }, // Above
+        { x: block.position.x, y: block.position.y + block.height }, // Below
+        { x: block.position.x - block.width, y: block.position.y }, // Left
+        { x: block.position.x + block.width, y: block.position.y }, // Right
+      ];
+
+      for (var position of adjacentPositions) {
+        // Check if within 3 tiles (3 * blockSize)
+        const distFromPlayer = Math.hypot(position.x - this.position.x, position.y - this.position.y);
+        if (distFromPlayer <= (3 * settings.collisionBlock.width) + this.height) {
+          // Check distance from mouse position
+          const distFromMouse = Math.hypot(position.x - this.mouseX, position.y - this.mouseY);
+          if (distFromMouse < minDistance && this.isValidPlacement(position)) {
+            minDistance = distFromMouse;
+            closestBlock = position;
+          }
+        }
+      }
+    }
+
+    if (closestBlock) {
+      this.closestValidBlock = new CollisionBlock({x: closestBlock.x / settings.collisionBlock.width, y: closestBlock.y / settings.collisionBlock.height}, this.canvas);
+    } else {
+      this.closestValidBlock = null;
+    }
+  }
+
   draw() {
     // Update position
     this.position.x += this.velocityX
@@ -165,6 +232,16 @@ export class Player {
       const gunX = this.position.x + this.width / 2;
       const gunY = this.position.y + this.height / 2;
       this.curGun.draw(gunX, gunY, this.gunAngle, this.direction);
+
+      // Draw closest valid block in build mode
+      if (this.buildingMode) {
+        this.findClosestValidPlacement()
+        if (this.closestValidBlock) {
+          const { x, y } = this.closestValidBlock.position;
+          this.canvas.fillStyle = "rgba(255, 0, 0, 0.5)";
+          this.canvas.fillRect(x, y, 30, 30);
+        }
+      }
     }
   }
 

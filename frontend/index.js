@@ -9,9 +9,15 @@ window.onload = function() {
   }
 }
 
-// Resize canvas according to window size
+
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
+
+// Connect to server
+const wsManager = new WebSocketManager("ws://localhost:8080/ws", ctx);
+const gameManager = wsManager.gameManager;
+
+// Resize canvas according to window size
 const nativeWidth = settings.game.nativeWidth;   // Dimensions that the canvas 
 const nativeHeight = settings.game.nativeHeight; // will be optimized for
 
@@ -53,11 +59,10 @@ function resizeCanvas() {
     canvasCenterX - mapCenterX * scaleFitNative,
     canvasCenterY - mapCenterY * scaleFitNative 
   );
+
+  gameManager.updateGameDimensions(canvasCenterX, canvasCenterY, mapCenterX, mapCenterY, scaleFitNative)
 }
 resizeCanvas();
-
-// Connect to server
-const wsManager = new WebSocketManager("ws://localhost:8080/ws", ctx);
 
 // Send create party event when the create button is clicked
 var createButton = document.getElementById("create-button");

@@ -48,6 +48,7 @@ func (m *Manager) setupEventHandlers() {
 	m.handlers[EventJoinParty] = JoinParty
 	m.handlers[EventPlayerMoved] = PlayerMoved
 	m.handlers[EventBulletFired] = BulletFired
+	m.handlers[EventBlockPlaced] = BlockPlaced
 	m.handlers[EventGunRotation] = GunRotated
 }
 
@@ -182,6 +183,10 @@ func (m *Manager) playerMoved(client *Client, payload PlayerMovedPayload) {
 			client.velocityY = client.jumpPower * payload.TimeSinceLastEvent
 		} else if key == "r" {
 			client.switchGun() // TODO: Take this out of this function
+		} else if key == "b" {
+			client.buildingMode = !client.buildingMode
+		} else if key == "c" {
+			client.placeBuild = !client.placeBuild
 		}
 	}
 }
@@ -202,7 +207,7 @@ func (m *Manager) bulletFired(client *Client, payload BulletFiredPayload) {
 	client.party.fireBullet(payload.PlayerId, payload.TimeSinceLastEvent)
 }
 
-// Gun roteted event handler
+// Gun rotated event handler
 func GunRotated(event Event, m *Manager, c *Client) error {
 	var payload GunRotationPayload
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -220,6 +225,23 @@ func (m *Manager) gunRotated(client *Client, payload GunRotationPayload) {
 	} else if payload.KeyPressed == "s" && client.gunRotation < maxGunAngle {
 		client.updateGunRotation(client.guns[client.curGunIdx].rotationAmount)
 	}
+}
+
+// Block placed event handler
+func BlockPlaced(event Event, m *Manager, c *Client) error {
+	var payload BlockPlacedPayload
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		return err
+	}
+
+	m.blockPlaced(c, payload)
+
+	return nil
+}
+
+// Places block if it is valid to place
+func (m *Manager) blockPlaced(client *Client, payload BlockPlacedPayload) {
+	client.party.placeBlock(payload.PlayerId, payload.Block)
 }
 
 // Connects a client

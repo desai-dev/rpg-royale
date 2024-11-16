@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand/v2"
 	"sync"
 	"time"
@@ -138,8 +139,11 @@ func (p *Party) updateClients() {
 	// Send player positions to client
 	p.sendPlayerData()
 
-	// Send bullet updates to clients TODO: Make this its own function
+	// Send bullet updates to clients
 	p.sendBulletData()
+
+	// Send map updates to clients
+	p.sendMapData()
 }
 
 // Updates clients positions based on velocity
@@ -302,6 +306,39 @@ func (p *Party) sendBulletData() {
 	p.mutex.Unlock()
 }
 
+// Sends updated map data to clients
+func (p *Party) sendMapData() {
+	p.mutex.Lock()
+
+	var mapUpdate MapUpdatePayload
+	if len(p.collisionBlocks) > 0 {
+		var blockData []CollisionBlockData
+		for _, block := range p.collisionBlocks {
+			data := CollisionBlockData{block.position, block.width, block.height}
+			blockData = append(blockData, data)
+		}
+		mapUpdate.Blocks = blockData
+
+		payloadBytes, err := json.Marshal(mapUpdate)
+		if err != nil {
+			fmt.Println("Error marshaling bullet update:", err)
+			return
+		}
+
+		mapUpdateEvent := &Event{
+			Type:    EventUpdateMap,
+			Payload: payloadBytes,
+		}
+
+		// Send to all players
+		for _, player := range p.players {
+			player.egress <- mapUpdateEvent
+		}
+	}
+
+	p.mutex.Unlock()
+}
+
 // Fires a bullet from the given clients position
 func (p *Party) fireBullet(playerId int, deltaTime float64) {
 	// Lock mutex because we are modifying p.unsentBullets which might
@@ -315,6 +352,32 @@ func (p *Party) fireBullet(playerId int, deltaTime float64) {
 	p.bullets = append(p.bullets, bullet)
 
 	p.unsentBullets = append(p.unsentBullets, bullet)
+}
+
+// Places a block if its valid to place
+func (p *Party) placeBlock(playerId int, block CollisionBlockData) {
+	collisionBlock := NewCollisionBlock(block.Width, block.Height, block.Position.X, block.Position.Y)
+	player := p.players[playerId]
+
+	// Check distance from player
+	distFromPlayer := math.Hypot(block.Position.X-player.position.X, block.Position.Y-player.position.Y)
+	if distFromPlayer > (3*collisionBlockWidth)+playerHeight {
+		println("Block placement too far from player")
+		return
+	}
+
+	// Check collisions with players
+	for _, player := range p.players {
+		if CheckCollision(collisionBlock, player) {
+			println("Collision with another player")
+			return
+		}
+	}
+
+	// Check collisions with other collision blocks
+	p.mutex.Lock()
+	p.collisionBlocks = append(p.collisionBlocks, collisionBlock)
+	defer p.mutex.Unlock()
 }
 
 // Function to stop the ticker when the game is over

@@ -14,6 +14,7 @@ type EventHandler func(event Event, m *Manager, c *Client) error
 const (
 	// Events that are the same for both the server and client
 	EventBulletFired = "BULLET_FIRED"
+	EventBlockPlaced = "BLOCK_PLACED"
 
 	// Events that come from client side
 	EventCreateParty = "CREATE_PARTY"
@@ -25,6 +26,7 @@ const (
 	EventPartyCreated  = "PARTY_CREATED"
 	EventGameStart     = "GAME_START"
 	EventUpdatePlayers = "PLAYERS_UPDATE"
+	EventUpdateMap     = "MAP_UPDATE"
 )
 
 // ************* PAYLOADS FOR RECIEVING/SENDING DATA FROM/TO CLIENT ************* //
@@ -40,6 +42,13 @@ type BulletFiredPayload struct {
 	Damage             float64  `json:"damage"`
 	Name               string   `json:"name"`
 	TimeSinceLastEvent float64  `json:"timeSinceLastEvent"`
+}
+
+// Payload to store collision block data
+type CollisionBlockData struct {
+	Position Position `json:"position"`
+	Width    float64  `json:"width"`
+	Height   float64  `json:"height"`
 }
 
 // ************* PAYLOADS FOR RECIEVING DATA FROM CLIENT ************* //
@@ -61,6 +70,12 @@ type PlayerMovedPayload struct {
 type GunRotationPayload struct {
 	PlayerId   int    `json:"playerId"`
 	KeyPressed string `json:"keyPressed"`
+}
+
+// Payload structure for BLOCK_PLACED event
+type BlockPlacedPayload struct {
+	PlayerId int                `json:"playerId"`
+	Block    CollisionBlockData `json:"block"`
 }
 
 // ************* PAYLOADS FOR SENDING DATA TO CLIENT ************* //
@@ -135,4 +150,9 @@ func NewPartyCreatedPayload(partyId string) PartyCreatedPayload {
 	return PartyCreatedPayload{
 		PartyID: partyId,
 	}
+}
+
+// Payload strucutre for MAP_UPDATE event
+type MapUpdatePayload struct {
+	Blocks []CollisionBlockData `json:"blocks"`
 }

@@ -20,6 +20,8 @@ type Client struct {
 	guns          []*Gun
 	curGunIdx     int
 	gunRotation   float64
+	buildingMode  bool
+	placeBuild    bool
 	inParty       bool
 	playerId      int
 	position      Position
@@ -67,6 +69,8 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 		},
 		curGunIdx:     0,
 		gunRotation:   0,
+		buildingMode:  false,
+		placeBuild:    false,
 		inParty:       false,
 		position:      Position{X: 0, Y: 0},
 		speedX:        playerSpeedX,
