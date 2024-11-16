@@ -15,7 +15,7 @@ type PartyList map[string]*Party
 type Party struct {
 	id              string
 	players         []*Client
-	collisionBlocks []*CollisionBlock
+	collisionBlocks *SharedArray[*CollisionBlock]
 	bullets         *SharedArray[*Bullet]
 	bulletQueue     *SharedArray[*Bullet]
 	partySize       int
@@ -31,7 +31,7 @@ func NewParty(partyID string) *Party {
 	return &Party{
 		id:              partyID,
 		players:         make([]*Client, 0),
-		collisionBlocks: make([]*CollisionBlock, 0),
+		collisionBlocks: NewSharedArray[*CollisionBlock](),
 		bullets:         NewSharedArray[*Bullet](),
 		bulletQueue:     NewSharedArray[*Bullet](),
 		partySize:       0,
@@ -65,7 +65,13 @@ func (p *Party) removePartyPlayer(client *Client) {
 func (p *Party) initializeGame() {
 	initializeDefaultMap()
 	for _, collisionBlockCoords := range defaultMap {
-		p.collisionBlocks = append(p.collisionBlocks, NewCollisionBlock(float64(collisionBlockWidth), float64(collisionBlockHeight), float64(collisionBlockCoords[0]*collisionBlockHeight), float64(collisionBlockCoords[1]*collisionBlockHeight)))
+		collisionBlock := NewCollisionBlock(
+			float64(collisionBlockWidth),
+			float64(collisionBlockHeight),
+			float64(collisionBlockCoords[0]*collisionBlockHeight),
+			float64(collisionBlockCoords[1]*collisionBlockHeight),
+		)
+		p.collisionBlocks.Add(collisionBlock)
 	}
 	payload := NewGameStartPayload(defaultMap)
 	payload.PartyID = p.id
@@ -183,7 +189,8 @@ func (p *Party) checkHorizontalCollisions() {
 
 	for _, player := range p.players {
 		// Collision block collisions with player
-		for _, block := range p.collisionBlocks {
+		collisionBlocks := p.collisionBlocks.GetAll()
+		for _, block := range collisionBlocks {
 			if CheckCollision(player, block) {
 				if player.velocityX > 0 {
 					player.velocityX = 0
@@ -216,7 +223,8 @@ func (p *Party) checkHorizontalCollisions() {
 	bullets := p.bullets.GetAll()
 	for _, bullet := range bullets {
 		addBullet := true
-		for _, block := range p.collisionBlocks {
+		collisionBlocks := p.collisionBlocks.GetAll()
+		for _, block := range collisionBlocks {
 			if CheckCollision(bullet, block) {
 				addBullet = false
 				break
@@ -233,7 +241,8 @@ func (p *Party) checkHorizontalCollisions() {
 // Checks for vertical collisions
 func (p *Party) checkVerticalCollisions() {
 	for _, player := range p.players {
-		for _, block := range p.collisionBlocks {
+		collisionBlocks := p.collisionBlocks.GetAll()
+		for _, block := range collisionBlocks {
 			if CheckCollision(player, block) {
 				if player.velocityY > 0 {
 					player.velocityY = 0
@@ -309,9 +318,10 @@ func (p *Party) sendMapData() {
 	p.mutex.Lock()
 
 	var mapUpdate MapUpdatePayload
-	if len(p.collisionBlocks) > 0 {
+	if p.collisionBlocks.Length() > 0 {
 		var blockData []CollisionBlockData
-		for _, block := range p.collisionBlocks {
+		collisionBlocks := p.collisionBlocks.GetAll()
+		for _, block := range collisionBlocks {
 			data := CollisionBlockData{block.position, block.width, block.height}
 			blockData = append(blockData, data)
 		}
@@ -368,7 +378,7 @@ func (p *Party) placeBlock(playerId int, block CollisionBlockData) {
 
 	// Check collisions with other collision blocks
 	p.mutex.Lock()
-	p.collisionBlocks = append(p.collisionBlocks, collisionBlock)
+	p.collisionBlocks.Add(collisionBlock)
 	defer p.mutex.Unlock()
 }
 

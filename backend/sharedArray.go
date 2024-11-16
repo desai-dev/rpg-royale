@@ -51,3 +51,10 @@ func (a *SharedArray[T]) SetItems(items []T) {
 	defer a.mutex.Unlock()
 	a.items = items
 }
+
+// Length returns the length of the SharedArray (thread-safe)
+func (a *SharedArray[T]) Length() int {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	return len(a.items)
+}
