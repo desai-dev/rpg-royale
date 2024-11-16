@@ -16,8 +16,8 @@ type Party struct {
 	id              string
 	players         []*Client
 	collisionBlocks []*CollisionBlock
-	bullets         []*Bullet
-	bulletQueue     *SharedQueue[*Bullet]
+	bullets         *SharedArray[*Bullet]
+	bulletQueue     *SharedArray[*Bullet]
 	partySize       int
 	gravity         float64
 	maxFallSpeed    float64
@@ -32,8 +32,8 @@ func NewParty(partyID string) *Party {
 		id:              partyID,
 		players:         make([]*Client, 0),
 		collisionBlocks: make([]*CollisionBlock, 0),
-		bullets:         make([]*Bullet, 0),
-		bulletQueue:     &SharedQueue[*Bullet]{items: make([]*Bullet, 0)},
+		bullets:         NewSharedArray[*Bullet](),
+		bulletQueue:     NewSharedArray[*Bullet](),
 		partySize:       0,
 		gravity:         gravityConstant,
 		maxFallSpeed:    playerMaxFallSpeed,
@@ -52,7 +52,7 @@ func (p *Party) addPartyPlayer(client *Client) {
 func (p *Party) removePartyPlayer(client *Client) {
 	for i, player := range p.players {
 		if player == client {
-			// Remove the client from the players slice
+			// Remove the client from the players array
 			p.players = append(p.players[:i], p.players[i+1:]...)
 			p.partySize--
 			break
@@ -156,14 +156,14 @@ func (p *Party) updateClientPositions() {
 // Updates bullet positions based on velocity
 func (p *Party) updateBulletPositions() {
 	var remainingBullets []*Bullet
-
-	for _, bullet := range p.bullets {
+	bullets := p.bullets.GetAll()
+	for _, bullet := range bullets {
 		if bullet.updatePosition(bullet.position.X+bullet.velocityX, bullet.position.Y+bullet.velocityY) {
 			remainingBullets = append(remainingBullets, bullet)
 		}
 	}
 
-	p.bullets = remainingBullets
+	p.bullets.SetItems(remainingBullets)
 }
 
 // Applies gravity to players
@@ -197,7 +197,8 @@ func (p *Party) checkHorizontalCollisions() {
 		}
 
 		// Bullet collisions with player
-		for _, bullet := range p.bullets {
+		bullets := p.bullets.GetAll()
+		for _, bullet := range bullets {
 			if CheckCollision(player, bullet) {
 				player.health -= bullet.damage
 				if player.health <= 0 {
@@ -207,12 +208,13 @@ func (p *Party) checkHorizontalCollisions() {
 				remainingBullets = append(remainingBullets, bullet)
 			}
 		}
-		p.bullets = remainingBullets
+		p.bullets.SetItems(remainingBullets)
 		remainingBullets = remainingBullets[:0]
 	}
 
 	// Bullet collisions with platforms
-	for _, bullet := range p.bullets {
+	bullets := p.bullets.GetAll()
+	for _, bullet := range bullets {
 		addBullet := true
 		for _, block := range p.collisionBlocks {
 			if CheckCollision(bullet, block) {
@@ -225,7 +227,7 @@ func (p *Party) checkHorizontalCollisions() {
 		}
 	}
 
-	p.bullets = remainingBullets
+	p.bullets.SetItems(remainingBullets)
 }
 
 // Checks for vertical collisions
@@ -268,7 +270,7 @@ func (p *Party) sendPlayerData() {
 
 // Sends updated bullet data to clients
 func (p *Party) sendBulletData() {
-	unsentBullets := p.bulletQueue.DequeueBatch()
+	unsentBullets := p.bulletQueue.RemoveAll()
 	if len(unsentBullets) > 0 {
 		for _, bullet := range unsentBullets {
 			bulletUpdate := BulletFiredPayload{
@@ -340,8 +342,8 @@ func (p *Party) fireBullet(playerId int, deltaTime float64) {
 	playerGun := p.players[playerId].guns[p.players[playerId].curGunIdx]
 	bullet := playerGun.shootBullet(p.players[playerId], deltaTime)
 
-	p.bullets = append(p.bullets, bullet)
-	p.bulletQueue.Enqueue(bullet)
+	p.bullets.Add(bullet)
+	p.bulletQueue.Add(bullet)
 }
 
 // Places a block if its valid to place
